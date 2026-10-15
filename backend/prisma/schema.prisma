@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int              @id @default(autoincrement())
+  nombre    String
+  email     String           @unique
+  password  String
+  cargo     String           @default("Empleado")
+  cuenta    String           @default("Svelte")
+  lob       String           @default("E-commerce")
+  modalidad String           @default("Remoto")
+  rol       String           @default("EMPLEADO")
+  creadoEn  DateTime         @default(now())
+
+  sesiones  Sesion[]
+  horarios  ControlHorario[]
+}
+
+model Sesion {
+  id         Int       @id @default(autoincrement())
+  usuarioId  Int
+  usuario    Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiraEn   DateTime
+  revocadaEn DateTime?
+  creadoEn   DateTime  @default(now())
+}
+
+model ControlHorario {
+  id                Int       @id @default(autoincrement())
+  usuarioId         Int
+  usuario           Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  horaEntrada       DateTime  @default(now())
+  horaSalida        DateTime?
+  minutosTrabajados Int?
+  modalidad         String    @default("Remoto")
+  estado            String    @default("EN_JORNADA")
+  observacion       String?
+  creadoEn          DateTime  @default(now())
+}

@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuestas de Diseño - Control de Inventario | Tellcenter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-sidebar: #091728;
+            --bg-sidebar-active: #0d253f;
+            --bg-main: #f3f6f9;
+            --turquesa: #00c4cc;
+            --turquesa-dark: #009ba3;
+            --turquesa-soft: #e0f8f9;
+            --text-dark: #111c2d;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --card-bg: #ffffff;
+            --danger-soft: #fef2f2;
+            --danger-text: #dc2626;
+            --warn-soft: #fffbeb;
+            --warn-text: #d97706;
+            --ok-soft: #ecfdf5;
+            --ok-text: #059669;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-main);
+            color: var(--text-dark);
+        }
+
+        /* ===== BARRA FLOTANTE PARA CAMBIAR DE PROPUESTA (NO SALE EN EL PDF) ===== */
+        .selector-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #091728;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            z-index: 9999;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .selector-bar span {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-right: 6px;
+            font-weight: 500;
+        }
+        .selector-bar button {
+            background: rgba(255,255,255,0.08);
+            color: #e2e8f0;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .selector-bar button.active {
+            background: var(--turquesa);
+            color: #062229;
+        }
+        .selector-bar button.btn-pdf {
+            background: #10b981;
+            color: #fff;
+            margin-left: 8px;
+        }
+
+        /* ===== LAYOUT DE CADA PÁGINA / PROPUESTA ===== */
+        .proposal-screen {
+            display: none;
+            min-height: 100vh;
+            width: 100%;
+        }
+        .proposal-screen.active {
+            display: grid;
+            grid-template-columns: 245px 1fr;
+        }
+
+        /* ===== SIDEBAR TELLCENTER ===== */
+        .sidebar {
+            background: var(--bg-sidebar);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 22px 0 0 0;
+        }
+        .brand {
+            padding: 0 24px 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .brand img {
+            max-height: 30px;
+        }
+        .brand .slash {
+            color: var(--turquesa);
+        }
+        .nav-group {
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 6px;
+        }
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+        .nav-sub a {
+            display: block;
+            padding: 9px 14px 9px 26px;
+            font-size: 13.5px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .nav-sub a.active {
+            color: var(--turquesa);
+            background: rgba(0, 196, 204, 0.08);
+            font-weight: 600;
+        }
+        .nav-item {
+            padding: 12px 26px;
+            font-size: 14px;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+        }
+        .side-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding: 16px 20px;
+        }
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .avatar-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--turquesa);
+            color: #04242c;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .user-mini-info strong {
+            display: block;
+            font-size: 14px;
+        }
+        .user-mini-info small {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        .side-icons {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        /* ===== CONTENIDO PRINCIPAL ===== */
+        .main-area {
+            padding: 28px 34px 80px;
+        }
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .top-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .top-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 3px;
+        }
+        .proposal-badge {
+            display: inline-block;
+            background: #0f172a;
+            color: var(--turquesa);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .top-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-outline {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13.5px;
+            color: var(--text-dark);
+        }
+        .btn-primary {
+            background: var(--turquesa);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13.5px;
+            color: #fff;
+        }
+
+        /* ===== BARRA DE FILTROS ===== */
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 180px 180px 180px;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .search-input, .select-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ===== PILLS DE ESTADO ===== */
+        .pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .pill-asignado { background: var(--turquesa-soft); color: var(--turquesa-dark); }
+        .pill-bodega { background: var(--ok-soft); color: var(--ok-text); }
+        .pill-mant { background: var(--warn-soft); color: var(--warn-text); }
+        .pill-baja { background: var(--danger-soft); color: var(--danger-text); }
+
+        /* ===== PROPUESTA 1: MAESTRO-DETALLE ===== */
+        .master-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 310px;
+            gap: 20px;
+            align-items: start;
+        }
+        .card-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(15,23,42,0.03);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13.5px;
+            vertical-align: middle;
+        }
+        tr.selected-row {
+            background: #f0fdfe;
+        }
+        .item-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .item-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #e0f7f9;
+            color: #008b94;
+            font-weight: 700;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .item-sub {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Panel Derecho de Detalle */
+        .detail-panel {
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .detail-avatar {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: var(--turquesa);
+            color: #06282e;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .detail-panel h3 {
+            font-size: 19px;
+            margin-bottom: 2px;
+        }
+        .detail-panel .serial {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .detail-list {
+            margin: 18px 0;
+            text-align: left;
+            border-top: 1px solid #f1f5f9;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+        .detail-row span:first-child { color: var(--text-muted); }
+        .detail-row span:last-child { font-weight: 600; text-align: right; }
+        .detail-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .detail-btn.danger {
+            background: var(--danger-soft);
+            color: var(--danger-text);
+            border-color: #fecaca;
+        }
+
+        /* ===== PROPUESTA 2: DASHBOARD KPI + TABLA ===== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .kpi-card small {
+            color: var(--text-muted);
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+        .kpi-card h2 {
+            font-size: 28px;
+            margin-top: 4px;
+        }
+        .kpi-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .tabs-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .tab-pill {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .tab-pill.active {
+            background: #091728;
+            color: #fff;
+            border-color: #091728;
+        }
+
+        /* ===== PROPUESTA 3: KITS POR EMPLEADO ===== */
+        .kits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+        .kit-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .kit-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 14px;
+        }
+        .kit-meta {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .kit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .kit-item small {
+            color: var(--text-muted);
+            display: block;
+            font-size: 11.5px;
+        }
+        .kit-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 12.5px;
+        }
+
+        /* ===== PROPUESTA 4: TABLERO KANBAN DE ESTADOS ===== */
+        .kanban-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .kanban-col {
+            background: #eaeff5;
+            border-radius: 12px;
+            padding: 14px;
+        }
+        .kanban-col-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 13.5px;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+        .kanban-count {
+            background: #fff;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+        }
+        .kanban-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--turquesa);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        .kanban-card.bodega { border-left-color: #10b981; }
+        .kanban-card.mant { border-left-color: #f59e0b; }
+        .kanban-card.baja { border-left-color: #ef4444; }
+        .kanban-card h4 { font-size: 14px; margin-bottom: 3px; }
+        .kanban-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+        .kanban-card-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        /* ===== MODO IMPRESIÓN / EXPORTAR LAS 4 PROPUESTAS EN PDF ===== */
+        @media print {
+            @page { size: landscape; margin: 0; }
+            .selector-bar { display: none !important; }
+            .proposal-screen {
+                display: grid !important;
+                grid-template-columns: 230px 1fr !important;
+                page-break-after: always;
+                break-after: page;
+                min-height: 100vh;
+            }
+            .main-area { padding: 20px 24px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA DE CONTROL FLOTANTE -->
+    <div class="selector-bar">
+        <span>Vista previa:</span>
+        <button class="active" onclick="verPropuesta(1, this)">Propuesta 1: Maestro-Detalle</button>
+        <button onclick="verPropuesta(2, this)">Propuesta 2: Dashboard KPI</button>
+        <button onclick="verPropuesta(3, this)">Propuesta 3: Kits por Empleado</button>
+        <button onclick="verPropuesta(4, this)">Propuesta 4: Kanban Soporte IT</button>
+        <button class="btn-pdf" onclick="window.print()">📄 Guardar las 4 en PDF</button>
+    </div>
+
+    <!-- =========================================================================
+         PROPUESTA 1: VISTA MAESTRO-DETALLE (SIMÉTRICA A GESTIÓN DE USUARIOS)
+         ========================================================================= -->
+    <section class="proposal-screen active" id="prop-1">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">Tellcenter<span class="slash">/</span></div>
+                <div class="nav-group">
+                    <div class="nav-header"><span>🔐 Accesos</span><span>⌄</span></div>
+                    <div class="nav-sub">
+                        <a href="#">Mi perfil</a>
+                        <a href="#">Gestión de Usuarios</a>
+                        <a href="#" class="active">Control de Inventario</a>
+                    </div>
+                </div>
+                <div class="nav-item"><span>📰 Portal de Noticias</span><span>›</span></div>
+                <div class="nav-item"><span>⏱️ Control de Horarios</span><span>›</span></div>
+            </div>
+            <div class="side-footer">
+                <div class="user-mini">
+                    <div class="avatar-circle">FR</div>
+                    <div class="user-mini-info"><strong>Fredy Ramos</strong><small>Desarrollador</small></div>
+                </div>
+                <div class="side-icons"><span>⏻</span><span>🔔</span><span>❓</span></div>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <div class="top-header">
+                <div>
+                    <span class="proposal-badge">Propuesta 1 · Vista Maestro-Detalle (Idéntica a Gestión de Usuarios)</span>
+                    <h1>Control de Inventario</h1>
+                    <p>Equipos tecnológicos y activos asignados al personal de Tellcenter.</p>
+                </div>
+                <div class="top-actions">
+                    <button class="btn-outline">↓ Exportar a Excel</button>
+                    <button class="btn-primary">+ Nuevo equipo</button>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="search-input">🔍 Buscar por código, número de serie, marca o empleado...</div>
+                <div class="select-box"><span>Todas las categorías</span><span>⌄</span></div>
+                <div class="select-box"><span>Todas las cuentas</span><span>⌄</span></div>
+                <div class="select-box"><span>Todos los estados</span><span>⌄</span></div>
+            </div>
+
+            <div class="master-detail-grid">
+                <div class="card-box">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>EQUIPO / SERIE</th>
+                                <th>CATEGORÍA</th>
+                                <th>ASIGNADO A</th>
+                                <th>CUENTA</th>
+                                <th>ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="selected-row">
+                                <td>
+                                    <div class="item-cell">
+                                        <div class="item-icon">LP</div>
+                                        <div><strong>Dell Latitude 5440</strong><span class="item-sub">TC-LAP-0042 · S/N: DL5440-981</span></div>
+                                    </div>
+                                </td>
+                                <td>Laptop</td>
+                                <td><strong>Fredy Ramos</strong><span class="item-sub">Remoto</span></td>
+                                <td>Svelte</td>
+                                <td><span class="pill pill-asignado">Asignado</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="item-cell">
+                                        <div class="item-icon">HS</div>
+                                        <div><strong>Jabra Biz 2400 II USB</strong><span class="item-sub">TC-HDS-0118 · S/N: JB24-4410</span></div>
+                                    </div>
+                                </td>
+                                <td>Headset</td>
+                                <td><strong>Anna Prueba</strong><span class="item-sub">Presencial</span></td>
+                                <td>Riverhealth</td>
+                                <td><span class="pill pill-asignado">Asignado</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="item-cell">
+                                        <div class="item-icon">MN</div>
+                                        <div><strong>Monitor LG UltraWide 24"</strong><span class="item-sub">TC-MON-0089 · S/N: LG24-7721</span></div>
+                                    </div>
+                                </td>
+                                <td>Monitor</td>
+                                <td><span class="item-sub">Sin asignar (Bodega IT)</span></td>
+                                <td>—</td>
+                                <td><span class="pill pill-bodega">Disponible</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="item-cell">
+                                        <div class="item-icon">LP</div>
+                                        <div><strong>HP ProBook 450 G9</strong><span class="item-sub">TC-LAP-0019 · S/N: HP450-3329</span></div>
+                                    </div>
+                                </td>
+                                <td>Laptop</td>
+                                <td><span class="item-sub">Taller Soporte Técnico</span></td>
+                                <td>Svelte</td>
+                                <td><span class="pill pill-mant">Mantenimiento</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Panel lateral de detalle -->
+                <div class="card-box detail-panel">
+                    <div class="detail-avatar">LP</div>
+                    <h3>Dell Latitude 5440</h3>
+                    <p class="serial">Código: TC-LAP-0042 · Serie: DL5440-981</p>
+                    <span class="pill pill-asignado">Asignado</span>
+
+                    <div class="detail-list">
+                        <div class="detail-row"><span>Categoría</span><span>Laptop (Core i7 / 16GB)</span></div>
+                        <div class="detail-row"><span>Resguardo actual</span><span>Fredy Ramos</span></div>
+                        <div class="detail-row"><span>Cuenta / LOB</span><span>Svelte · E-commerce</span></div>
+                        <div class="detail-row"><span>Modalidad</span><span>Remoto</span></div>
+                        <div class="detail-row"><span>Fecha de entrega</span><span>12/10/2026</span></div>
+                        <div class="detail-row"><span>Entregado por</span><span>Diego Velado</span></div>
+                    </div>
+
+                    <button class="detail-btn">Editar datos del equipo</button>
+                    <button class="detail-btn">Registrar devolución / Reasignar</button>
+                    <button class="detail-btn danger">Enviar a mantenimiento / Baja</button>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- =========================================================================
+         PROPUESTA 2: DASHBOARD OPERATIVO CON TARJETAS KPI + FILTROS RÁPIDOS
+         ========================================================================= -->
+    <section class="proposal-screen" id="prop-2">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">Tellcenter<span class="slash">/</span></div>
+                <div class="nav-group">
+                    <div class="nav-header"><span>🔐 Accesos</span><span>⌄</span></div>
+                    <div class="nav-sub">
+                        <a href="#">Mi perfil</a>
+                        <a href="#">Gestión de Usuarios</a>
+                        <a href="#" class="active">Control de Inventario</a>
+                    </div>
+                </div>
+                <div class="nav-item"><span>📰 Portal de Noticias</span><span>›</span></div>
+                <div class="nav-item"><span>⏱️ Control de Horarios</span><span>›</span></div>
+            </div>
+            <div class="side-footer">
+                <div class="user-mini">
+                    <div class="avatar-circle">FR</div>
+                    <div class="user-mini-info"><strong>Fredy Ramos</strong><small>Desarrollador</small></div>
+                </div>
+                <div class="side-icons"><span>⏻</span><span>🔔</span><span>❓</span></div>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <div class="top-header">
+                <div>
+                    <span class="proposal-badge">Propuesta 2 · Dashboard de Métricas KPI + Tabla Completa</span>
+                    <h1>Resumen y Stock de Inventario</h1>
+                    <p>Monitoreo en tiempo real de equipos disponibles en bodega, asignados y en soporte.</p>
+                </div>
+                <div class="top-actions">
+                    <button class="btn-outline">↓ Exportar reporte</button>
+                    <button class="btn-primary">+ Registrar activo</button>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div><small>TOTAL DE EQUIPOS</small><h2>240</h2></div>
+                    <div class="kpi-badge" style="background:#e0f8f9;color:#008b94;">📦</div>
+                </div>
+                <div class="kpi-card">
+                    <div><small>ASIGNADOS A EMPLEADOS</small><h2>195</h2></div>
+                    <div class="kpi-badge" style="background:#dbeafe;color:#2563eb;">👤</div>
+                </div>
+                <div class="kpi-card">
+                    <div><small>DISPONIBLES EN BODEGA</small><h2>38</h2></div>
+                    <div class="kpi-badge" style="background:#ecfdf5;color:#059669;">✅</div>
+                </div>
+                <div class="kpi-card">
+                    <div><small>EN MANTENIMIENTO / FALLA</small><h2>7</h2></div>
+                    <div class="kpi-badge" style="background:#fffbeb;color:#d97706;">🛠️</div>
+                </div>
+            </div>
+
+            <div class="tabs-row">
+                <div class="tab-pill active">Todos (240)</div>
+                <div class="tab-pill">💻 Laptops / PCs (98)</div>
+                <div class="tab-pill">🎧 Headsets (84)</div>
+                <div class="tab-pill">🖥️ Monitores (42)</div>
+                <div class="tab-pill">⌨️ Periféricos / UPS (16)</div>
+            </div>
+
+            <div class="card-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CÓDIGO</th>
+                            <th>EQUIPO Y MODELO</th>
+                            <th>N° SERIE</th>
+                            <th>COLABORADOR ASIGNADO</th>
+                            <th>CUENTA / MODALIDAD</th>
+                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>TC-LAP-0042</strong></td>
+                            <td>Dell Latitude 5440 (16GB RAM)</td>
+                            <td>DL5440-981</td>
+                            <td>Fredy Ramos</td>
+                            <td>Svelte · Remoto</td>
+                            <td><span class="pill pill-asignado">Asignado</span></td>
+                            <td><strong>Gestionar ›</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TC-HDS-0118</strong></td>
+                            <td>Jabra Biz 2400 II Duo NC</td>
+                            <td>JB24-4410</td>
+                            <td>Anna Prueba</td>
+                            <td>Riverhealth · Presencial</td>
+                            <td><span class="pill pill-asignado">Asignado</span></td>
+                            <td><strong>Gestionar ›</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TC-MON-0089</strong></td>
+                            <td>Monitor LG 24" IPS FullHD</td>
+                            <td>LG24-7721</td>
+                            <td><em>Bodega Central IT</em></td>
+                            <td>Disponible para entrega</td>
+                            <td><span class="pill pill-bodega">En Bodega</span></td>
+                            <td><strong style="color:#009ba3;">+ Asignar ›</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TC-LAP-0019</strong></td>
+                            <td>HP ProBook 450 G9</td>
+                            <td>HP450-3329</td>
+                            <td><em>En revisión por Soporte</em></td>
+                            <td>Cambio de batería</td>
+                            <td><span class="pill pill-mant">Mantenimiento</span></td>
+                            <td><strong>Ver ticket ›</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </section>
+
+    <!-- =========================================================================
+         PROPUESTA 3: VISTA POR "KITS DE EMPLEADO" (AGRUPACIÓN POR COLABORADOR)
+         ========================================================================= -->
+    <section class="proposal-screen" id="prop-3">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">Tellcenter<span class="slash">/</span></div>
+                <div class="nav-group">
+                    <div class="nav-header"><span>🔐 Accesos</span><span>⌄</span></div>
+                    <div class="nav-sub">
+                        <a href="#">Mi perfil</a>
+                        <a href="#">Gestión de Usuarios</a>
+                        <a href="#" class="active">Control de Inventario</a>
+                    </div>
+                </div>
+                <div class="nav-item"><span>📰 Portal de Noticias</span><span>›</span></div>
+                <div class="nav-item"><span>⏱️ Control de Horarios</span><span>›</span></div>
+            </div>
+            <div class="side-footer">
+                <div class="user-mini">
+                    <div class="avatar-circle">FR</div>
+                    <div class="user-mini-info"><strong>Fredy Ramos</strong><small>Desarrollador</small></div>
+                </div>
+                <div class="side-icons"><span>⏻</span><span>🔔</span><span>❓</span></div>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <div class="top-header">
+                <div>
+                    <span class="proposal-badge">Propuesta 3 · Vista de Kits Asignados por Empleado</span>
+                    <h1>Resguardo de Equipos por Colaborador</h1>
+                    <p>Visualiza el paquete completo de herramientas que tiene asignado cada miembro de Tellcenter.</p>
+                </div>
+                <div class="top-actions">
+                    <button class="btn-outline">📦 Ver Stock en Bodega (38)</button>
+                    <button class="btn-primary">+ Asignar Kit a Empleado</button>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="search-input">🔍 Buscar empleado por nombre, correo o código de equipo asignado...</div>
+                <div class="select-box"><span>Cuenta: Todas</span><span>⌄</span></div>
+                <div class="select-box"><span>Modalidad: Todas</span><span>⌄</span></div>
+                <div class="select-box"><span>Estado de Acta</span><span>⌄</span></div>
+            </div>
+
+            <div class="kits-grid">
+                <!-- Tarjeta Empleado 1 -->
+                <div class="kit-card">
+                    <div class="kit-header">
+                        <div class="avatar-circle">FR</div>
+                        <div>
+                            <strong>Fredy Ramos</strong>
+                            <small style="display:block;color:#64748b;font-size:12px;">fredy.ramos@tellcenter.com</small>
+                            <div class="kit-meta">
+                                <span class="pill pill-asignado" style="font-size:11px;">Svelte</span>
+                                <span class="pill pill-bodega" style="font-size:11px;">Remoto</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kit-item">
+                        <div><strong>💻 Laptop Dell Latitude 5440</strong><small>TC-LAP-0042 · Serie: DL5440-981</small></div>
+                        <span class="pill pill-asignado">OK</span>
+                    </div>
+                    <div class="kit-item">
+                        <div><strong>🎧 Headset Jabra Evolve2 40</strong><small>TC-HDS-0094 · Serie: JB40-1120</small></div>
+                        <span class="pill pill-asignado">OK</span>
+                    </div>
+                    <div class="kit-item">
+                        <div><strong>🖥️ Monitor Dell 24" P2422H</strong><small>TC-MON-0031 · Serie: DL24-8821</small></div>
+                        <span class="pill pill-asignado">OK</span>
+                    </div>
+                    <div class="kit-footer">
+                        <span style="color:#64748b;">3 equipos bajo resguardo</span>
+                        <strong style="color:#009ba3;">+ Agregar / Editar kit ›</strong>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Empleado 2 -->
+                <div class="kit-card">
+                    <div class="kit-header">
+                        <div class="avatar-circle">AP</div>
+                        <div>
+                            <strong>Anna Prueba</strong>
+                            <small style="display:block;color:#64748b;font-size:12px;">ana.prueba@tellcenter.com</small>
+                            <div class="kit-meta">
+                                <span class="pill pill-asignado" style="font-size:11px;">Riverhealth</span>
+                                <span class="pill pill-mant" style="font-size:11px;">Presencial</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kit-item">
+                        <div><strong>💻 PC OptiPlex 7010 Micro</strong><small>TC-PC-0012 · Estación Piso 2 #14</small></div>
+                        <span class="pill pill-asignado">OK</span>
+                    </div>
+                    <div class="kit-item">
+                        <div><strong>🎧 Headset Jabra Biz 2400 II</strong><small>TC-HDS-0118 · Serie: JB24-4410</small></div>
+                        <span class="pill pill-asignado">OK</span>
+                    </div>
+                    <div class="kit-footer">
+                        <span style="color:#64748b;">2 equipos bajo resguardo</span>
+                        <strong style="color:#009ba3;">+ Agregar / Editar kit ›</strong>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Empleado 3 -->
+                <div class="kit-card">
+                    <div class="kit-header">
+                        <div class="avatar-circle">DV</div>
+                        <div>
+                            <strong>Diego Velado</strong>
+                            <small style="display:block;color:#64748b;font-size:12px;">diego.velado@tellcenter.com</small>
+                            <div class="kit-meta">
+                                <span class="pill pill-asignado" style="font-size:11px;">Svelte</span>
+                                <span class="pill pill-bodega" style="font-size:11px;">Remoto</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kit-item">
+                        <div><strong>💻 MacBook Pro / Laptop Dev</strong><small>TC-LAP-0001 · Serie: MBP-9001</small></div>
+                        <span class="pill pill-asignado">OK</span>
+                    </div>
+                    <div class="kit-item">
+                        <div><strong>🖥️ Monitor LG UltraWide 29"</strong><small>TC-MON-0004 · Serie: LG29-5501</small></div>
+                        <span class="pill pill-asignado">OK</span>
+                    </div>
+                    <div class="kit-footer">
+                        <span style="color:#64748b;">2 equipos bajo resguardo</span>
+                        <strong style="color:#009ba3;">+ Agregar / Editar kit ›</strong>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- =========================================================================
+         PROPUESTA 4: TABLERO KANBAN DE CICLO DE VIDA Y SOPORTE IT
+         ========================================================================= -->
+    <section class="proposal-screen" id="prop-4">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">Tellcenter<span class="slash">/</span></div>
+                <div class="nav-group">
+                    <div class="nav-header"><span>🔐 Accesos</span><span>⌄</span></div>
+                    <div class="nav-sub">
+                        <a href="#">Mi perfil</a>
+                        <a href="#">Gestión de Usuarios</a>
+                        <a href="#" class="active">Control de Inventario</a>
+                    </div>
+                </div>
+                <div class="nav-item"><span>📰 Portal de Noticias</span><span>›</span></div>
+                <div class="nav-item"><span>⏱️ Control de Horarios</span><span>›</span></div>
+            </div>
+            <div class="side-footer">
+                <div class="user-mini">
+                    <div class="avatar-circle">FR</div>
+                    <div class="user-mini-info"><strong>Fredy Ramos</strong><small>Desarrollador</small></div>
+                </div>
+                <div class="side-icons"><span>⏻</span><span>🔔</span><span>❓</span></div>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <div class="top-header">
+                <div>
+                    <span class="proposal-badge">Propuesta 4 · Tablero Kanban de Flujo y Estado Técnico</span>
+                    <h1>Tablero de Ciclo de Vida de Activos</h1>
+                    <p>Control visual por columnas desde que el equipo entra a bodega hasta su asignación o soporte.</p>
+                </div>
+                <div class="top-actions">
+                    <button class="btn-outline">Vista de Tabla</button>
+                    <button class="btn-primary">+ Ingresar lote a bodega</button>
+                </div>
+            </div>
+
+            <div class="kanban-grid">
+                <!-- Columna 1 -->
+                <div class="kanban-col">
+                    <div class="kanban-col-head"><span>📦 En Bodega (Stock)</span><span class="kanban-count">38</span></div>
+                    <div class="kanban-card bodega">
+                        <h4>Monitor LG UltraWide 24"</h4>
+                        <p>TC-MON-0089 · S/N: LG24-7721</p>
+                        <div class="kanban-card-foot">
+                            <span class="pill pill-bodega">Listo para entrega</span>
+                            <strong>Asignar →</strong>
+                        </div>
+                    </div>
+                    <div class="kanban-card bodega">
+                        <h4>Headset Logitech H390 USB</h4>
+                        <p>TC-HDS-0142 · S/N: LGH39-221</p>
+                        <div class="kanban-card-foot">
+                            <span class="pill pill-bodega">Nuevo en caja</span>
+                            <strong>Asignar →</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna 2 -->
+                <div class="kanban-col">
+                    <div class="kanban-col-head"><span>🟢 Asignados en Operación</span><span class="kanban-count">195</span></div>
+                    <div class="kanban-card">
+                        <h4>Dell Latitude 5440</h4>
+                        <p>TC-LAP-0042 · S/N: DL5440-981</p>
+                        <div class="kanban-card-foot">
+                            <span>👤 <strong>Fredy Ramos</strong> (Remoto)</span>
+                            <span class="pill pill-asignado">Svelte</span>
+                        </div>
+                    </div>
+                    <div class="kanban-card">
+                        <h4>Jabra Biz 2400 II USB</h4>
+                        <p>TC-HDS-0118 · S/N: JB24-4410</p>
+                        <div class="kanban-card-foot">
+                            <span>👤 <strong>Anna Prueba</strong> (Piso)</span>
+                            <span class="pill pill-asignado">Riverhealth</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna 3 -->
+                <div class="kanban-col">
+                    <div class="kanban-col-head"><span>🛠️ En Mantenimiento / IT</span><span class="kanban-count">7</span></div>
+                    <div class="kanban-card mant">
+                        <h4>HP ProBook 450 G9</h4>
+                        <p>TC-LAP-0019 · Falla en batería</p>
+                        <div class="kanban-card-foot">
+                            <span class="pill pill-mant">En revisión IT</span>
+                            <strong>Liberar ✓</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna 4 -->
+                <div class="kanban-col">
+                    <div class="kanban-col-head"><span>🔴 De Baja / Descarte</span><span class="kanban-count">3</span></div>
+                    <div class="kanban-card baja">
+                        <h4>Headset Plantronics Blackwire</h4>
+                        <p>TC-HDS-0008 · Cable dañado</p>
+                        <div class="kanban-card-foot">
+                            <span class="pill pill-baja">Baja definitiva</span>
+                            <span>Acta #04</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script>
+        function verPropuesta(num, btn) {
+            document.querySelectorAll('.proposal-screen').forEach(el => el.classList.remove('active'));
+            document.getElementById('prop-' + num).classList.add('active');
+            document.querySelectorAll('.selector-bar button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

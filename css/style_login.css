@@ -1,0 +1,126 @@
+/* =========================================================
+   Tellcenter - Login de empleados (layout estilo Bixpe)
+   Colores de la marca Tellcenter
+   ========================================================= */
+:root {
+    --accent: #00d4e0;          /* Cyan Tellcenter */
+    --accent-hover: #3be6ef;
+    --navy: #001f3f;            /* Azul Tellcenter */
+    --teal: #00788c;            /* Verde azulado Tellcenter */
+    --panel: #0f2233;           /* Fondo del formulario (azul más claro) */
+    --input: #183247;
+    --border: rgba(255, 255, 255, 0.18);
+    --text: #ffffff;
+    --muted: #b3c2cf;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    background: var(--panel);
+}
+a { color: inherit; text-decoration: none; }
+
+.login-page { display: flex; min-height: 100vh; }
+
+/* ===== PANEL IZQUIERDO: foto con capa azul Tellcenter ===== */
+.login-brand {
+    flex: 0 0 45%;              /* Mismo ancho que la referencia de Bixpe */
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px;
+   background: url('../img/oficinaimg.jpg') center/cover no-repeat;
+    position: relative;
+}
+.login-logo { width: 100%; max-width: 380px; }
+.login-brand-text { margin-top: 20px; font-size: 1.15em; color: rgba(255, 255, 255, 0.85); }
+
+/* ===== PANEL DERECHO: color sólido, sin sombras ===== */
+.login-panel {
+    flex: 1;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    padding: 60px 30px;
+    background: var(--panel);
+}
+.login-form { width: 100%; max-width: 360px; }
+
+.login-title {
+    font-size: 0.95em; font-weight: 600; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 2px; white-space: nowrap;
+    margin-bottom: 45px;
+}
+
+.login-form label {
+    display: block;
+    font-size: 0.75em; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+.login-form input {
+    width: 100%; padding: 12px 14px; margin-bottom: 26px;
+    background: var(--input); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    font-family: inherit; font-size: 1em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-form input::placeholder { color: #7f93a4; }
+.login-form input:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 212, 224, 0.2);
+}
+
+.btn-login {
+    display: block; width: 100%;
+    padding: 14px; margin-top: 4px;
+    background: var(--accent); color: var(--navy);
+    border-radius: 50px;
+    font-size: 1.1em; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 1px;
+    transition: background 0.2s, transform 0.2s;
+}
+.btn-login:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+.login-help { margin-top: 30px; text-align: center; color: var(--muted); }
+.login-help a { color: var(--accent); font-weight: 600; }
+.login-help a:hover, .login-forgot a:hover { text-decoration: underline; }
+.login-forgot { margin-top: 14px; text-align: right; color: var(--muted); }
+
+.login-back {
+    position: absolute; top: 30px; right: 40px;
+    color: var(--muted); font-size: 0.95em;
+    transition: color 0.2s;
+}
+.login-back:hover { color: var(--accent); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 800px) {
+    .login-page { flex-direction: column; }
+    .login-brand {
+        flex: none; padding: 60px 30px;
+        border-right: none;
+        border-bottom: 4px solid var(--accent);  /* En celular el corte es horizontal */
+    }
+    .login-logo { max-width: 260px; }
+    .login-panel { padding: 50px 24px 90px; }
+    .login-title { margin-bottom: 35px; }
+    .login-back { top: auto; bottom: 30px; right: 50%; transform: translateX(50%); }
+}
+
+/* ===== LOGIN DEMO: botón y mensaje de error ===== */
+button.btn-login {
+    border: none; cursor: pointer;
+    font-family: inherit;
+}
+.login-error {
+    display: none;
+    margin: 0 0 18px; padding: 10px 14px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    border-radius: 6px;
+    color: #fca5a5; font-size: 0.9em;
+}
+.login-error.visible { display: block; animation: shake 0.35s; }
+@keyframes shake {
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}

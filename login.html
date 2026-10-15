@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Empleados | Tellcenter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style_login.css">
+</head>
+<body>
+
+    <main class="login-page">
+
+        <!-- ===== PANEL IZQUIERDO: foto + logo ===== -->
+        <aside class="login-brand"></aside>
+        <!-- ===== PANEL DERECHO: formulario ===== -->
+        <section class="login-panel">
+            <form class="login-form" id="login-form" novalidate>
+                <p class="login-title">Tellcenter · Portal de Empleados</p>
+
+                <label for="correo">Correo corporativo</label>
+                <input type="email" id="correo" name="correo" placeholder="nombre@tellcenter.com" autocomplete="username">
+
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" autocomplete="current-password">
+
+                <!-- Se muestra si el correo o la contraseña no coinciden -->
+                <p class="login-error" id="login-error" role="alert" style="display: none;">Correo o contraseña incorrectos. Intenta de nuevo.</p>
+
+                <button type="submit" class="btn-login">Ingresar</button>
+
+                <p class="login-help">¿Problemas para entrar? <a href="#">Contacta a Soporte IT</a></p>
+                <p class="login-forgot"><a href="#">🔒 ¿Olvidaste tu contraseña?</a></p>
+            </form>
+        </section>
+
+    </main>
+    
+    <script>
+        // Conexión real con el Backend de Node.js / Express
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Evita que la página se recargue por defecto
+
+            // Capturar los valores utilizando tus IDs exactos
+            const email = document.getElementById('correo').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+
+            // Ocultar mensaje de error anterior por defecto
+            errorElement.style.display = 'none';
+
+            try {
+                // Petición POST al servidor backend en el puerto 3000
+                const respuesta = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const resultado = await respuesta.json();
+
+                if (respuesta.ok) {
+                    // 1. Guardar de forma segura el Token y los datos del usuario en el navegador
+                    localStorage.setItem('token', resultado.token);
+                    localStorage.setItem('usuario', JSON.stringify(resultado.usuario));
+
+                    // 2. Redirigir a tu página de perfil real
+                    window.location.href = 'mi_perfil.html';
+                } else {
+                    // Mostrar tu diseño de error en pantalla con el mensaje del servidor
+                    errorElement.textContent = resultado.error || 'Correo o contraseña incorrectos. Intenta de nuevo.';
+                    errorElement.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error de conexión:', error);
+                errorElement.textContent = 'No se pudo conectar con el servidor backend.';
+                errorElement.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

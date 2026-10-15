@@ -1,0 +1,188 @@
+/* =========================================================
+   Tellcenter - Mi perfil
+   Archivo independiente: incluye colores, sidebar,
+   menú móvil y la tarjeta de perfil.
+   ========================================================= */
+
+/* ===== COLORES Y MEDIDAS ===== */
+:root {
+    --accent: #00d4e0;          /* Cyan Tellcenter */
+    --accent-dark: #00a3b0;
+    --navy: #001f3f;
+    --side: #0b1a2a;            /* Sidebar */
+    --side-2: #10263a;          /* Grupo abierto */
+    --side-3: #081420;          /* Logo, submenú y barra inferior */
+    --side-text: #c5d3df;
+    --side-muted: #8fa3b5;
+    --bg: #eef2f5;              /* Fondo del contenido */
+    --card: #ffffff;
+    --line: #d6dee5;
+    --text: #1d2b38;
+    --muted: #5b6b78;
+    --sidebar-w: 280px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    position: sticky; top: 0; height: 100vh;
+    background: var(--side); color: var(--side-text);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+}
+.side-logo { display: block; padding: 22px; background: var(--side-3); }
+.side-logo img { width: 170px; display: block; }
+
+.nav { flex: 1; padding: 10px 0; }
+.nav summary {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 22px;
+    font-size: 1.02em; cursor: pointer; list-style: none;
+    transition: background 0.2s;
+}
+.nav summary::-webkit-details-marker { display: none; }
+.nav summary:hover { background: var(--side-2); }
+.nav .ico { width: 22px; text-align: center; }
+.nav .chev { margin-left: auto; color: var(--side-muted); transition: transform 0.2s; }
+
+/* Grupo abierto */
+.nav details[open] > summary {
+    background: var(--side-2); color: #fff; font-weight: 600;
+    border-left: 3px solid var(--accent); padding-left: 19px;
+}
+.nav details[open] .chev { transform: rotate(90deg); color: var(--accent); }
+
+/* Subfunciones */
+.sub { background: var(--side-3); padding: 6px 0; }
+.sub a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 18px 10px 54px;
+    font-size: 0.93em; color: #9fb2c3; white-space: nowrap;
+    transition: color 0.2s;
+}
+.sub a:hover { color: #fff; }
+.sub a.active { color: var(--accent); font-weight: 600; }
+.role {
+    margin-left: auto; flex-shrink: 0;
+    font-size: 0.68em; padding: 2px 7px; border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08); color: var(--side-muted);
+}
+.popup { margin-left: auto; font-size: 0.8em; color: var(--side-muted); }
+
+/* Usuario y botones inferiores */
+.side-user {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+.side-user small { display: block; color: var(--side-muted); font-size: 0.8em; }
+.avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--accent); color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+}
+.side-bottom {
+    display: flex; justify-content: space-around;
+    padding: 14px 0; background: var(--side-3);
+    font-size: 1.15em;
+}
+.side-bottom a { opacity: 0.75; transition: opacity 0.2s; }
+.side-bottom a:hover { opacity: 1; }
+
+/* ===== CONTENIDO ===== */
+.content { flex: 1; min-width: 0; }
+.mp-page { padding: 34px 44px; }
+
+/* Título de la página */
+.mp-top h1 { font-size: 2em; font-weight: 500; }
+.mp-top p { color: var(--muted); margin: 6px 0 26px; }
+
+/* ===== TARJETA DE PERFIL ===== */
+.mp-card {
+    max-width: 620px; margin: 0 auto;
+    padding: 36px;
+    background: var(--card);
+    border: 1px solid var(--line); border-radius: 14px;
+    text-align: center;
+}
+
+.mp-avatar {
+    width: 96px; height: 96px; margin: 0 auto 14px;
+    border-radius: 50%;
+    background: var(--accent); color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2em; font-weight: 700;
+}
+.mp-name { font-size: 1.6em; font-weight: 600; }
+.mp-email { color: var(--muted); margin: 4px 0 14px; word-break: break-all; }
+
+/* Etiquetas: Activo / Admin */
+.mp-tags { display: flex; justify-content: center; gap: 6px; }
+.mp-pill {
+    font-size: 0.78em; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+    background: rgba(0, 212, 224, 0.14); color: var(--accent-dark);
+}
+.mp-pill-admin { background: var(--navy); color: #fff; }
+
+/* Lista de datos */
+.mp-list { margin-top: 26px; text-align: left; border-top: 1px solid var(--line); }
+.mp-row {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding: 14px 4px;
+    border-bottom: 1px solid var(--line);
+}
+.mp-row dt { color: var(--muted); }
+.mp-row dd { font-weight: 500; text-align: right; }
+
+/* Aviso inferior */
+.mp-note {
+    margin-top: 22px; padding: 12px 16px;
+    font-size: 0.9em; color: var(--muted);
+    background: #f6f9fb;
+    border: 1px dashed var(--line); border-radius: 10px;
+}
+
+/* ===== MENÚ MÓVIL (sin JavaScript) ===== */
+.menu-toggle, .mobile-bar { display: none; }
+
+@media (max-width: 900px) {
+    body { display: block; }
+
+    .mobile-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        position: sticky; top: 0; z-index: 30;
+        padding: 14px 20px; background: var(--side-3);
+    }
+    .mobile-bar img { width: 140px; }
+    .menu-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .menu-icon span, .menu-icon span::before, .menu-icon span::after {
+        display: block; width: 22px; height: 2px; background: #fff; position: relative;
+    }
+    .menu-icon span::before, .menu-icon span::after { content: ''; position: absolute; }
+    .menu-icon span::before { top: -7px; }
+    .menu-icon span::after { top: 7px; }
+
+    /* Sidebar como panel deslizable */
+    .sidebar {
+        position: fixed; left: 0; top: 0; z-index: 40;
+        transform: translateX(-100%); transition: transform 0.3s;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+    }
+    .menu-toggle:checked ~ .sidebar { transform: translateX(0); }
+
+    .mp-page { padding: 20px; }
+    .mp-card { padding: 26px 20px; }
+}

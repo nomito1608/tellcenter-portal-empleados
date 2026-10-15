@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Horarios | Portal de Empleados Tellcenter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style_mi_perfil.css">
+    <style>
+        .ch-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+            margin-top: 20px;
+            align-items: start;
+        }
+        @media (max-width: 960px) {
+            .ch-grid { grid-template-columns: 1fr; }
+        }
+        .ch-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .clock-box {
+            text-align: center;
+            padding: 18px 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #e2e8f0;
+        }
+        .clock-time {
+            font-size: 38px;
+            font-weight: 700;
+            color: #091728;
+            letter-spacing: 1px;
+        }
+        .clock-date {
+            font-size: 13.5px;
+            color: #64748b;
+            margin-top: 4px;
+            text-transform: capitalize;
+        }
+        .status-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13.5px;
+            margin-bottom: 16px;
+        }
+        .status-idle { background: #f1f5f9; color: #475569; }
+        .status-working { background: #e0f8f9; color: #007a80; }
+        .ch-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 14px;
+            font-family: inherit;
+        }
+        .btn-action {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 10px;
+        }
+        .btn-entrada {
+            background: #00c4cc;
+            color: #04242c;
+        }
+        .btn-entrada:hover:not(:disabled) { background: #00adb5; }
+        .btn-salida {
+            background: #ef4444;
+            color: #ffffff;
+        }
+        .btn-salida:hover:not(:disabled) { background: #dc2626; }
+        .btn-action:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .ch-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        .ch-table th {
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #64748b;
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .ch-table td {
+            padding: 12px;
+            font-size: 13.5px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .badge-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+        .badge-active { background: #e0f8f9; color: #007a80; }
+        .badge-done { background: #ecfdf5; color: #059669; }
+        .badge-revoked { background: #fef2f2; color: #dc2626; }
+        .hash-code {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+
+    <header class="mobile-bar">
+        <img src="img/logo-tellcenter-blanco.png" alt="Tellcenter">
+        <label for="menu-toggle" class="menu-icon" aria-label="Abrir menú"><span></span></label>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="mi_perfil.html" class="side-logo">
+            <img src="img/logo-tellcenter-blanco.png" alt="Tellcenter">
+        </a>
+
+        <nav class="nav">
+            <details>
+                <summary><span class="ico">🔐</span>Accesos<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="mi_perfil.html">Mi perfil</a>
+                </div>
+            </details>
+
+            <details>
+                <summary><span class="ico">📰</span>Portal de Noticias<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="#">Noticias</a>
+                </div>
+            </details>
+
+            <details open>
+                <summary><span class="ico">⏱️</span>Control de Horarios<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="control_horario.html" class="active">Marcar entrada/salida</a>
+                </div>
+            </details>
+        </nav>
+
+        <div class="side-user">
+            <div class="avatar" id="side-avatar">--</div>
+            <div>
+                <span id="side-name" style="display:block; font-weight:600;">Usuario</span>
+                <small id="side-cargo">Cargando...</small>
+            </div>
+        </div>
+        <div class="side-bottom">
+            <a href="#" id="btn-logout" title="Cerrar sesión">⏻</a>
+            <a href="#" title="Notificaciones">🔔</a>
+            <a href="#" title="Ayuda">❓</a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="content mp-page">
+        <div class="mp-top">
+            <h1>Control de Horarios y Sesiones</h1>
+            <p>Registra tu inicio y fin de jornada laboral y audita tus sesiones activas.</p>
+        </div>
+
+        <div class="ch-grid">
+            <!-- Panel Izquierdo: Reloj y Botones de Marcaje -->
+            <section class="ch-card">
+                <div class="clock-box">
+                    <div class="clock-time" id="reloj-actual">00:00:00</div>
+                    <div class="clock-date" id="fecha-actual">Cargando fecha...</div>
+                </div>
+
+                <div id="estado-jornada" class="status-banner status-idle">
+                    ⚪ Sin jornada iniciada
+                </div>
+
+                <input type="text" id="input-observacion" class="ch-input" placeholder="Nota opcional (ej. Turno regular / Home Office)">
+
+                <button id="btn-marcar-entrada" class="btn-action btn-entrada">
+                    ▶ Marcar Entrada Laboral
+                </button>
+                <button id="btn-marcar-salida" class="btn-action btn-salida" disabled>
+                    ⏹ Marcar Salida Laboral
+                </button>
+            </section>
+
+            <!-- Panel Derecho: Historial de Horarios + Auditoría de Sesiones JWT -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <section class="ch-card">
+                    <h3 style="margin-bottom: 4px;">📋 Historial de Jornadas Registradas</h3>
+                    <p style="font-size: 13px; color: #64748b;">Registros sincronizados en PostgreSQL (Tabla <code>ControlHorario</code>).</p>
+
+                    <table class="ch-table">
+                        <thead>
+                            <tr>
+                                <th>FECHA</th>
+                                <th>ENTRADA</th>
+                                <th>SALIDA</th>
+                                <th>DURACIÓN</th>
+                                <th>MODALIDAD</th>
+                                <th>ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-horarios">
+                            <tr><td colspan="6">Cargando registros...</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="ch-card">
+                    <h3 style="margin-bottom: 4px;">🔐 Seguimiento de Tokens JWT (Tabla <code>Sesion</code>)</h3>
+                    <p style="font-size: 13px; color: #64748b;">Trazabilidad de tokens emitidos, expiración y revocación en tiempo real.</p>
+
+                    <table class="ch-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>TOKEN HASH (SHA-256)</th>
+                                <th>CREADO EN</th>
+                                <th>EXPIRA EN</th>
+                                <th>ESTADO JWT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-sesiones">
+                            <tr><td colspan="5">Cargando sesiones...</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        const usuarioGuardado = localStorage.getItem('usuario');
+
+        if (!token || !usuarioGuardado) {
+            window.location.href = 'login.html';
+        }
+
+        const usuario = JSON.parse(usuarioGuardado || '{}');
+
+        // Rellenar datos del sidebar
+        function inicializarSidebar() {
+            let iniciales = 'US';
+            if (usuario.nombre) {
+                const partes = usuario.nombre.trim().split(' ');
+                iniciales = partes.length >= 2
+                    ? (partes[0][0] + partes[1][0]).toUpperCase()
+                    : partes[0].substring(0, 2).toUpperCase();
+            }
+            document.getElementById('side-avatar').textContent = iniciales;
+            document.getElementById('side-name').textContent = usuario.nombre ? usuario.nombre.split(' ')[0] : 'Usuario';
+            document.getElementById('side-cargo').textContent = usuario.cargo || 'Empleado';
+        }
+
+        // Reloj en tiempo real
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('reloj-actual').textContent = ahora.toLocaleTimeString('es-SV', { hour12: false });
+            document.getElementById('fecha-actual').textContent = ahora.toLocaleDateString('es-SV', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
+
+        // Cargar estado actual e historial desde el backend
+        async function cargarEstadoYHorarios() {
+            try {
+                const res = await fetch(`${API_URL}/horarios/mi-estado`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const data = await res.json();
+                const btnEntrada = document.getElementById('btn-marcar-entrada');
+                const btnSalida = document.getElementById('btn-marcar-salida');
+                const banner = document.getElementById('estado-jornada');
+
+                if (data.jornadaActiva) {
+                    const horaInicio = new Date(data.jornadaActiva.horaEntrada).toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' });
+                    banner.className = 'status-banner status-working';
+                    banner.textContent = `🟢 En jornada activa desde las ${horaInicio}`;
+                    btnEntrada.disabled = true;
+                    btnSalida.disabled = false;
+                } else {
+                    banner.className = 'status-banner status-idle';
+                    banner.textContent = '⚪ Fuera de turno (Listo para marcar entrada)';
+                    btnEntrada.disabled = false;
+                    btnSalida.disabled = true;
+                }
+
+                // Renderizar tabla de horarios
+                const tbodyHorarios = document.getElementById('tabla-horarios');
+                if (!data.historial || data.historial.length === 0) {
+                    tbodyHorarios.innerHTML = '<tr><td colspan="6">Aún no hay registros de horario.</td></tr>';
+                } else {
+                    tbodyHorarios.innerHTML = data.historial.map(item => {
+                        const fecha = new Date(item.horaEntrada).toLocaleDateString('es-SV');
+                        const entrada = new Date(item.horaEntrada).toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        const salida = item.horaSalida
+                            ? new Date(item.horaSalida).toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                            : '—';
+                        const duracion = item.minutosTrabajados ? `${item.minutosTrabajados} min` : 'En curso';
+                        const badgeClass = item.estado === 'EN_JORNADA' ? 'badge-active' : 'badge-done';
+
+                        return `
+                            <tr>
+                                <td><strong>${fecha}</strong></td>
+                                <td>${entrada}</td>
+                                <td>${salida}</td>
+                                <td>${duracion}</td>
+                                <td>${item.modalidad}</td>
+                                <td><span class="badge-pill ${badgeClass}">${item.estado}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                // Renderizar tabla de sesiones JWT
+                const tbodySesiones = document.getElementById('tabla-sesiones');
+                if (!data.sesiones || data.sesiones.length === 0) {
+                    tbodySesiones.innerHTML = '<tr><td colspan="5">Sin sesiones registradas.</td></tr>';
+                } else {
+                    tbodySesiones.innerHTML = data.sesiones.map(s => {
+                        const creado = new Date(s.creadoEn).toLocaleString('es-SV');
+                        const expira = new Date(s.expiraEn).toLocaleString('es-SV');
+                        const revocada = s.revocadaEn !== null;
+                        return `
+                            <tr>
+                                <td>#${s.id}</td>
+                                <td><span class="hash-code">${s.tokenHash.substring(0, 18)}...</span></td>
+                                <td>${creado}</td>
+                                <td>${expira}</td>
+                                <td>
+                                    <span class="badge-pill ${revocada ? 'badge-revoked' : 'badge-done'}">
+                                        ${revocada ? 'Revocada' : 'Activa'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Error cargando horarios:', err);
+            }
+        }
+
+        // Evento: Marcar Entrada
+        document.getElementById('btn-marcar-entrada').addEventListener('click', async () => {
+            const observacion = document.getElementById('input-observacion').value;
+            const res = await fetch(`${API_URL}/horarios/entrada`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ observacion })
+            });
+            if (res.ok) {
+                document.getElementById('input-observacion').value = '';
+                cargarEstadoYHorarios();
+            }
+        });
+
+        // Evento: Marcar Salida
+        document.getElementById('btn-marcar-salida').addEventListener('click', async () => {
+            const observacion = document.getElementById('input-observacion').value;
+            const res = await fetch(`${API_URL}/horarios/salida`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ observacion })
+            });
+            if (res.ok) {
+                document.getElementById('input-observacion').value = '';
+                cargarEstadoYHorarios();
+            }
+        });
+
+        // Evento: Cerrar Sesión registrando revocadaEn en BD
+        document.getElementById('btn-logout').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await fetch(`${API_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) {}
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        });
+
+        inicializarSidebar();
+        cargarEstadoYHorarios();
+    </script>
+</body>
+</html>
