@@ -45,3 +45,12 @@ model ControlHorario {
   observacion       String?
   creadoEn          DateTime  @default(now())
 }
+model Equipo {
+  id               Int      @id @default(autoincrement())
+  codigoInventario String   @unique
+  categoria        String   
+  marcaModelo      String
+  numeroSerie      String   @unique
+  estado           String   @default("EN_BODEGA") // EN_BODEGA, ASIGNADO, MANTENIMIENTO, BAJA
+  creadoEn         DateTime @default(now())
+}

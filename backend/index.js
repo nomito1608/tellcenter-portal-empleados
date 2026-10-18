@@ -276,6 +276,37 @@ app.post('/api/horarios/salida', autenticarToken, async (req, res) => {
     res.status(500).json({ error: 'Error al registrar la salida' });
   }
 });
+// ==========================================
+// 3. RUTAS DE INVENTARIO (FASE 1)
+// ==========================================
+
+// Obtener todos los equipos para llenar la tabla y los KPIs
+app.get('/api/inventario', autenticarToken, async (req, res) => {
+  try {
+    const equipos = await prisma.equipo.findMany({
+      orderBy: { creadoEn: 'desc' }
+    });
+    res.json(equipos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el inventario' });
+  }
+});
+
+// Registrar un nuevo equipo desde el formulario
+app.post('/api/inventario', autenticarToken, async (req, res) => {
+  try {
+    const { codigoInventario, categoria, marcaModelo, numeroSerie } = req.body;
+
+    const nuevoEquipo = await prisma.equipo.create({
+      data: { codigoInventario, categoria, marcaModelo, numeroSerie }
+    });
+    
+    res.status(201).json(nuevoEquipo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al crear el equipo. Verifica que el código o serie no estén duplicados.' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
