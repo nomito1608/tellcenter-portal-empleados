@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario | Tellcenter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style_mi_perfil.css">
+    <style>
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; margin-top: 20px; }
+        @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+        .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .kpi-card h2 { font-size: 28px; margin-top: 4px; color: #0f172a; }
+        .kpi-card small { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        
+        .tc-box { background: #ffffff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0; margin-bottom: 24px; }
+        
+        /* Formulario para agregar equipo */
+        .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+        .tc-input, .tc-select { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: 'Outfit'; width: 100%; box-sizing: border-box; }
+        .btn-primary { background: #00c4cc; color: #04242c; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-primary:hover { background: #00adb5; }
+        
+        /* Tabla limpia */
+        .tc-table { width: 100%; border-collapse: collapse; }
+        .tc-table th { text-align: left; font-size: 11.5px; text-transform: uppercase; color: #64748b; padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+        .tc-table td { padding: 12px 10px; font-size: 13.5px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        
+        .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+        .pill-bodega { background: #ecfdf5; color: #059669; }
+        .pill-asignado { background: #e0f8f9; color: #007a80; }
+        .pill-mantenimiento { background: #fffbeb; color: #d97706; }
+        .pill-baja { background: #fef2f2; color: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+
+    <header class="mobile-bar">
+        <img src="img/logo-tellcenter-blanco.png" alt="Tellcenter">
+        <label for="menu-toggle" class="menu-icon"><span></span></label>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="mi_perfil.html" class="side-logo"><img src="img/logo-tellcenter-blanco.png" alt="Tellcenter"></a>
+        <nav class="nav">
+            <details open>
+                <summary><span class="ico">🔐</span>Accesos<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="mi_perfil.html">Mi perfil</a>
+                </div>
+            </details>
+            <details>
+                <summary><span class="ico">⏱️</span>Control de Horarios<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="control_horario.html">Marcar entrada/salida</a>
+                </div>
+            </details>
+            <details open>
+                <summary><span class="ico">📦</span>Inventario<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="inventario.html" class="active">Gestión de Equipos</a>
+                </div>
+            </details>
+        </nav>
+
+        <div class="side-user">
+            <div class="avatar" id="side-avatar">--</div>
+            <div>
+                <span id="side-name" style="display:block; font-weight:600;">Usuario</span>
+                <small id="side-cargo">Cargando...</small>
+            </div>
+        </div>
+        <div class="side-bottom">
+            <a href="#" id="btn-logout" title="Cerrar sesión">⏻</a>
+            <a href="#" title="Notificaciones">🔔</a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="content mp-page">
+        <div class="mp-top">
+            <h1>Resumen y Stock de Inventario</h1>
+            <p>Fase 1: Registro y monitoreo del catálogo maestro de equipos en bodega.</p>
+        </div>
+
+        <!-- Dashboard KPI que le gustó a Diego -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div><small>Total Equipos Registrados</small><h2 id="kpi-total">0</h2></div>
+                <div style="font-size:24px;">📦</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>Disponibles en Bodega</small><h2 id="kpi-bodega">0</h2></div>
+                <div style="font-size:24px;">✅</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>Equipos Asignados</small><h2 id="kpi-asignado">0</h2></div>
+                <div style="font-size:24px;">👤</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>En Mantenimiento</small><h2 id="kpi-mant">0</h2></div>
+                <div style="font-size:24px;">🛠️</div>
+            </div>
+        </div>
+
+        <!-- Formulario: Ingresar Nuevo Equipo -->
+        <section class="tc-box">
+            <h3 style="margin-bottom: 14px;">+ Ingresar Nuevo Equipo al Catálogo</h3>
+            <form id="form-equipo">
+                <div class="form-grid">
+                    <input type="text" id="inp-codigo" class="tc-input" placeholder="Código (ej. TC-LAP-001)" required>
+                    <input type="text" id="inp-serie" class="tc-input" placeholder="Número de Serie" required>
+                    <select id="sel-categoria" class="tc-select" required>
+                        <option value="">Seleccionar Categoría...</option>
+                        <option value="Laptop">Laptop / PC</option>
+                        <option value="Headset">Headset</option>
+                        <option value="Monitor">Monitor</option>
+                        <option value="Periférico">Teclado / Mouse / Ups</option>
+                    </select>
+                    <input type="text" id="inp-marca" class="tc-input" placeholder="Marca y Modelo" required>
+                </div>
+                <button type="submit" class="btn-primary">Registrar en Base de Datos</button>
+                <p id="msg-form" style="margin-top: 10px; font-size: 13px; font-weight: 600;"></p>
+            </form>
+        </section>
+
+        <!-- Tabla Limpia de Equipos -->
+        <section class="tc-box">
+            <h3 style="margin-bottom: 14px;">Catálogo Maestro de Equipos</h3>
+            <table class="tc-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Categoría</th>
+                        <th>Marca y Modelo</th>
+                        <th>N° Serie</th>
+                        <th>Estado Actual</th>
+                        <th>Fecha Registro</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-equipos">
+                    <tr><td colspan="6">Cargando inventario...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        const usuarioGuardado = localStorage.getItem('usuario');
+
+        if (!token || !usuarioGuardado) window.location.href = 'login.html';
+
+        const usuario = JSON.parse(usuarioGuardado);
+
+        // Sidebar Info
+        let iniciales = 'US';
+        if (usuario.nombre) {
+            const partes = usuario.nombre.trim().split(' ');
+            iniciales = partes.length >= 2 ? (partes[0][0] + partes[1][0]).toUpperCase() : partes[0].substring(0,2).toUpperCase();
+        }
+        document.getElementById('side-avatar').textContent = iniciales;
+        document.getElementById('side-name').textContent = usuario.nombre.split(' ')[0];
+        document.getElementById('side-cargo').textContent = usuario.cargo;
+
+        // Cargar Inventario desde el Backend
+        async function cargarInventario() {
+            try {
+                const res = await fetch(`${API_URL}/inventario`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const equipos = await res.json();
+
+                // Calcular KPIs
+                document.getElementById('kpi-total').textContent = equipos.length;
+                document.getElementById('kpi-bodega').textContent = equipos.filter(e => e.estado === 'EN_BODEGA').length;
+                document.getElementById('kpi-asignado').textContent = equipos.filter(e => e.estado === 'ASIGNADO').length;
+                document.getElementById('kpi-mant').textContent = equipos.filter(e => e.estado === 'MANTENIMIENTO').length;
+
+                // Renderizar Tabla
+                const tbody = document.getElementById('tbody-equipos');
+                if (equipos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">No hay equipos registrados en bodega aún.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = equipos.map(eq => {
+                    const fecha = new Date(eq.creadoEn).toLocaleDateString('es-SV');
+                    let badgeClass = 'pill-bodega';
+                    let estadoLabel = 'En Bodega';
+                    if (eq.estado === 'ASIGNADO') { badgeClass = 'pill-asignado'; estadoLabel = 'Asignado'; }
+                    if (eq.estado === 'MANTENIMIENTO') { badgeClass = 'pill-mantenimiento'; estadoLabel = 'Mantenimiento'; }
+                    if (eq.estado === 'BAJA') { badgeClass = 'pill-baja'; estadoLabel = 'De Baja'; }
+
+                    return `
+                        <tr>
+                            <td><strong>${eq.codigoInventario}</strong></td>
+                            <td>${eq.categoria}</td>
+                            <td>${eq.marcaModelo}</td>
+                            <td><span style="font-family: monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${eq.numeroSerie}</span></td>
+                            <td><span class="pill ${badgeClass}">${estadoLabel}</span></td>
+                            <td>${fecha}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error("Error al cargar inventario");
+            }
+        }
+
+        // Agregar Equipo
+        document.getElementById('form-equipo').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgObj = document.getElementById('msg-form');
+            const data = {
+                codigoInventario: document.getElementById('inp-codigo').value,
+                numeroSerie: document.getElementById('inp-serie').value,
+                categoria: document.getElementById('sel-categoria').value,
+                marcaModelo: document.getElementById('inp-marca').value
+            };
+
+            const res = await fetch(`${API_URL}/inventario`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                msgObj.textContent = '✅ Equipo registrado con éxito en PostgreSQL';
+                msgObj.style.color = '#059669';
+                document.getElementById('form-equipo').reset();
+                cargarInventario();
+            } else {
+                const err = await res.json();
+                msgObj.textContent = '❌ Error: ' + (err.error || 'Código o serie duplicados');
+                msgObj.style.color = '#dc2626';
+            }
+            
+            setTimeout(() => msgObj.textContent = '', 4000);
+        });
+
+        // Logout
+        document.getElementById('btn-logout').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        cargarInventario();
+    </script>
+</body>
+</html>
