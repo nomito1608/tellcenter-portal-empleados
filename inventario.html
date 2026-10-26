@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario | Tellcenter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style_mi_perfil.css">
+    <style>
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; margin-top: 20px; }
+        @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+        .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .kpi-card h2 { font-size: 28px; margin-top: 4px; color: #0f172a; }
+        .kpi-card small { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+
+        .tc-box { background: #ffffff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0; margin-bottom: 24px; }
+
+        .two-col-forms { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+        @media (max-width: 980px) { .two-col-forms { grid-template-columns: 1fr; } }
+
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        .tc-input, .tc-select { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: 'Outfit'; width: 100%; box-sizing: border-box; }
+        .btn-primary { background: #00c4cc; color: #04242c; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-primary:hover { background: #00adb5; }
+        .btn-dark { background: #091728; color: #ffffff; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-dark:hover { background: #162a45; }
+
+        /* Barra de Filtros y Búsqueda */
+        .filter-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 6px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .filter-btn.active, .filter-btn:hover { background: #00c4cc; color: #04242c; border-color: #00adb5; }
+        .search-input { padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; font-family: 'Outfit'; width: 260px; }
+
+        /* Tarjetas de Kits por Empleado */
+        .kits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-top: 14px; }
+        .kit-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between; }
+        .kit-header { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; margin-bottom: 14px; }
+        .kit-avatar { width: 44px; height: 44px; border-radius: 50%; background: #00c4cc; color: #04242c; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .kit-meta { display: flex; gap: 6px; margin-top: 5px; }
+        .kit-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; font-size: 13px; border: 1px solid #f1f5f9; }
+        .kit-item small { color: #64748b; display: block; font-size: 11.5px; margin-top: 2px; }
+        .kit-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; font-size: 12.5px; }
+        .btn-mini-return { background: #fff; border: 1px solid #cbd5e1; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .btn-mini-return:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+        /* Tabla limpia */
+        .tc-table { width: 100%; border-collapse: collapse; }
+        .tc-table th { text-align: left; font-size: 11.5px; text-transform: uppercase; color: #64748b; padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+        .tc-table td { padding: 12px 10px; font-size: 13.5px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+
+        .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+        .pill-bodega { background: #ecfdf5; color: #059669; }
+        .pill-asignado { background: #e0f8f9; color: #007a80; }
+        .pill-alerta { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    </style>
+</head>
+<body>
+
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+
+    <header class="mobile-bar">
+        <img src="img/logo-tellcenter-blanco.png" alt="Tellcenter">
+        <label for="menu-toggle" class="menu-icon"><span></span></label>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="mi_perfil.html" class="side-logo"><img src="img/logo-tellcenter-blanco.png" alt="Tellcenter"></a>
+        <nav class="nav">
+            <details>
+                <summary><span class="ico">🔐</span>Accesos<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="mi_perfil.html">Mi perfil</a>
+                </div>
+            </details>
+            <details>
+                <summary><span class="ico">⏱️</span>Control de Horarios<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="control_horario.html">Marcar entrada/salida</a>
+                </div>
+            </details>
+            <details open>
+                <summary><span class="ico">📦</span>Inventario<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="inventario.html" class="active">Gestión de Equipos</a>
+                </div>
+            </details>
+        </nav>
+
+        <div class="side-user">
+            <div class="avatar" id="side-avatar">--</div>
+            <div>
+                <span id="side-name" style="display:block; font-weight:600;">Usuario</span>
+                <small id="side-cargo">Cargando...</small>
+            </div>
+        </div>
+        <div class="side-bottom">
+            <a href="#" id="btn-logout" title="Cerrar sesión">⏻</a>
+            <a href="#" title="Notificaciones">🔔</a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="content mp-page">
+        <div class="mp-top">
+            <h1>Resumen y Stock de Inventario</h1>
+            <p>Monitoreo en tiempo real, filtros avanzados de búsqueda y asignación de Kits por empleado.</p>
+        </div>
+
+        <!-- Dashboard KPI -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div><small>Total de Equipos</small><h2 id="kpi-total">0</h2></div>
+                <div style="font-size:24px;">📦</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>Asignados a Empleados</small><h2 id="kpi-asignado">0</h2></div>
+                <div style="font-size:24px;">👤</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>Disponibles en Bodega</small><h2 id="kpi-bodega">0</h2></div>
+                <div style="font-size:24px;">✅</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>En Mantenimiento</small><h2 id="kpi-mant">0</h2></div>
+                <div style="font-size:24px;">🛠️</div>
+            </div>
+        </div>
+
+        <!-- Formularios Alta y Asignación -->
+        <div class="two-col-forms">
+            <section class="tc-box">
+                <h3 style="margin-bottom: 12px;">1. Ingresar Nuevo Equipo a Bodega</h3>
+                <form id="form-equipo">
+                    <div class="form-grid-2">
+                        <input type="text" id="inp-codigo" class="tc-input" placeholder="Código (ej. TC-LAP-001)" required>
+                        <input type="text" id="inp-serie" class="tc-input" placeholder="Número de Serie" required>
+                        <select id="sel-categoria" class="tc-select" required>
+                            <option value="">Categoría...</option>
+                            <option value="Laptop">💻 Laptop / PC</option>
+                            <option value="Headset">🎧 Headset</option>
+                            <option value="Monitor">🖥️ Monitor</option>
+                            <option value="Periférico">⌨️ Periférico / UPS</option>
+                        </select>
+                        <input type="text" id="inp-marca" class="tc-input" placeholder="Marca y Modelo" required>
+                    </div>
+                    <button type="submit" class="btn-primary">+ Registrar en Bodega</button>
+                    <p id="msg-form" style="margin-top: 10px; font-size: 13px; font-weight: 600;"></p>
+                </form>
+            </section>
+
+            <section class="tc-box">
+                <h3 style="margin-bottom: 12px;">2. Asignar Equipo a Kit de Empleado</h3>
+                <form id="form-asignar">
+                    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;">
+                        <select id="sel-equipo-disponible" class="tc-select" required>
+                            <option value="">Seleccionar equipo disponible en bodega...</option>
+                        </select>
+                        <select id="sel-empleado" class="tc-select" required>
+                            <option value="">Seleccionar empleado de Tellcenter...</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-dark">🔗 Asignar al Kit del Empleado</button>
+                    <p id="msg-asignar" style="margin-top: 10px; font-size: 13px; font-weight: 600;"></p>
+                </form>
+            </section>
+        </div>
+
+        <!-- Kits por Empleado -->
+        <section class="tc-box">
+            <h3 style="margin-bottom: 4px;">👤 Kits de Equipos Bajo Resguardo por Colaborador</h3>
+            <p style="font-size: 13px; color: #64748b;">Vista agrupada por empleado con control rápido de devolución.</p>
+            <div class="kits-grid" id="contenedor-kits">
+                <p>Cargando kits de empleados...</p>
+            </div>
+        </section>
+
+        <!-- Catálogo Maestro con Filtros -->
+        <section class="tc-box">
+            <div class="filter-toolbar">
+                <h3 style="margin:0;">📦 Stock en Bodega Central IT</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filtrarCategoria('TODOS')">Todos</button>
+                    <button class="filter-btn" onclick="filtrarCategoria('Laptop')">Laptops</button>
+                    <button class="filter-btn" onclick="filtrarCategoria('Headset')">Headsets</button>
+                    <button class="filter-btn" onclick="filtrarCategoria('Monitor')">Monitores</button>
+                </div>
+                <input type="text" id="input-buscar" class="search-input" placeholder="🔍 Buscar por código o serie..." oninput="filtrarBusqueda()">
+            </div>
+            
+            <table class="tc-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Categoría</th>
+                        <th>Marca y Modelo</th>
+                        <th>N° Serie</th>
+                        <th>Estado / Antigüedad</th>
+                        <th>Fecha Registro</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-equipos">
+                    <tr><td colspan="6">Cargando stock en bodega...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- FASE 3: Bitácora de Movimientos y Auditoría -->
+        <section class="tc-box">
+            <h3 style="margin-bottom: 6px;">📋 Bitácora de Movimientos y Auditoría</h3>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 14px;">Registro histórico de trazabilidad de todos los activos tecnológicos.</p>
+            <table class="tc-table">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Código Equipo</th>
+                        <th>Acción</th>
+                        <th>Detalle del Movimiento</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-auditoria">
+                    <tr><td colspan="4">Cargando bitácora...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        const usuarioGuardado = localStorage.getItem('usuario');
+
+        if (!token || !usuarioGuardado) window.location.href = 'login.html';
+
+        const usuario = JSON.parse(usuarioGuardado || '{}');
+
+        let equiposGlobal = [];
+        let categoriaActiva = 'TODOS';
+
+        // Inicializar Sidebar
+        let iniciales = 'US';
+        if (usuario.nombre) {
+            const partes = usuario.nombre.trim().split(' ');
+            iniciales = partes.length >= 2 ? (partes[0][0] + partes[1][0]).toUpperCase() : partes[0].substring(0,2).toUpperCase();
+        }
+        document.getElementById('side-avatar').textContent = iniciales;
+        document.getElementById('side-name').textContent = usuario.nombre ? usuario.nombre.split(' ')[0] : 'Usuario';
+        document.getElementById('side-cargo').textContent = usuario.cargo || 'Empleado';
+
+        function iconoCategoria(cat) {
+            const c = (cat || '').toLowerCase();
+            if (c.includes('laptop') || c.includes('portátil') || c.includes('pc')) return '💻';
+            if (c.includes('headset') || c.includes('casco')) return '🎧';
+            if (c.includes('monitor')) return '🖥️';
+            return '⌨️';
+        }
+
+        async function cargarTodo() {
+            try {
+                const [resInv, resKits] = await Promise.all([
+                    fetch(`${API_URL}/inventario`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/inventario/kits`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                equiposGlobal = await resInv.json();
+                const empleados = await resKits.json();
+
+                // KPIs
+                const disponibles = equiposGlobal.filter(e => e.estado === 'EN_BODEGA');
+                const asignados = equiposGlobal.filter(e => e.estado === 'ASIGNADO');
+                const mant = equiposGlobal.filter(e => e.estado === 'MANTENIMIENTO');
+
+                document.getElementById('kpi-total').textContent = equiposGlobal.length;
+                document.getElementById('kpi-asignado').textContent = asignados.length;
+                document.getElementById('kpi-bodega').textContent = disponibles.length;
+                document.getElementById('kpi-mant').textContent = mant.length;
+
+                // Selectores
+                const selEquipo = document.getElementById('sel-equipo-disponible');
+                selEquipo.innerHTML = disponibles.length === 0 ? '<option value="">No hay equipos libres en bodega...</option>' :
+                    '<option value="">Seleccionar equipo disponible en bodega...</option>' +
+                    disponibles.map(eq => `<option value="${eq.id}">${eq.codigoInventario} — ${eq.marcaModelo} (${eq.categoria})</option>`).join('');
+
+                const selEmpleado = document.getElementById('sel-empleado');
+                selEmpleado.innerHTML = '<option value="">Seleccionar empleado de Tellcenter...</option>' +
+                    empleados.map(emp => `<option value="${emp.id}">${emp.nombre} (${emp.cuenta} · ${emp.modalidad})</option>`).join('');
+
+                // Renderizar Kits
+                document.getElementById('contenedor-kits').innerHTML = empleados.map(emp => {
+                    const partes = (emp.nombre || 'US').trim().split(' ');
+                    const ini = partes.length >= 2 ? (partes[0][0] + partes[1][0]).toUpperCase() : partes[0].substring(0,2).toUpperCase();
+                    const listaEquipos = emp.equipos || [];
+
+                    const itemsHtml = listaEquipos.length === 0 ? '<div class="kit-item"><span style="color:#94a3b8;">Sin equipos asignados actualmente</span></div>' :
+                        listaEquipos.map(eq => `
+                            <div class="kit-item">
+                                <div>
+                                    <strong>${iconoCategoria(eq.categoria)} ${eq.marcaModelo}</strong>
+                                    <small>${eq.codigoInventario} · Serie: ${eq.numeroSerie}</small>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span class="pill pill-asignado">Activo</span>
+                                    <button class="btn-mini-return" onclick="devolverEquipo(${eq.id})">↩ Bodega</button>
+                                </div>
+                            </div>
+                        `).join('');
+
+                    return `
+                        <div class="kit-card">
+                            <div>
+                                <div class="kit-header">
+                                    <div class="kit-avatar">${ini}</div>
+                                    <div>
+                                        <strong style="font-size:15px;">${emp.nombre}</strong>
+                                        <small style="display:block;color:#64748b;font-size:12px;">${emp.email}</small>
+                                        <div class="kit-meta">
+                                            <span class="pill pill-asignado">${emp.cuenta}</span>
+                                            <span class="pill pill-bodega">${emp.modalidad}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                ${itemsHtml}
+                            </div>
+                            <div class="kit-footer">
+                                <span style="color:#64748b;">${listaEquipos.length} equipo(s) bajo resguardo</span>
+                                <strong style="color:#009ba3;">Kit Verificado ✓</strong>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                renderizarTablaStock();
+            } catch (error) {
+                console.error('Error al cargar inventario:', error);
+            }
+        }
+
+        // Filtrar por pestañas de categoría
+        function filtrarCategoria(cat) {
+            categoriaActiva = cat;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(cat.toLowerCase()) || (cat === 'TODOS' && btn.textContent === 'Todos'));
+            });
+            renderizarTablaStock();
+        }
+
+        // Filtrar por barra de búsqueda
+        function filtrarBusqueda() {
+            renderizarTablaStock();
+        }
+
+        // Renderizar tabla con filtros aplicados y alertas de antigüedad
+        function renderizarTablaStock() {
+            const textoBusqueda = document.getElementById('input-buscar').value.toLowerCase();
+            const disponibles = equiposGlobal.filter(e => e.estado === 'EN_BODEGA');
+
+            const filtrados = disponibles.filter(eq => {
+                const matchCat = categoriaActiva === 'TODOS' || eq.categoria.toLowerCase() === categoriaActiva.toLowerCase();
+                const matchTexto = eq.codigoInventario.toLowerCase().includes(textoBusqueda) || eq.numeroSerie.toLowerCase().includes(textoBusqueda) || eq.marcaModelo.toLowerCase().includes(textoBusqueda);
+                return matchCat && matchTexto;
+            });
+
+            const tbody = document.getElementById('tbody-equipos');
+            if (filtrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No se encontraron equipos en bodega con estos filtros.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtrados.map(eq => {
+                const fechaReg = new Date(eq.creadoEn);
+                const diasEnBodega = Math.floor((new Date() - fechaReg) / (1000 * 60 * 60 * 24));
+                const badgeEstado = diasEnBodega > 30 ? `<span class="pill pill-alerta" title="Más de 30 días en bodega">⚠️ Stock Antiguo (${diasEnBodega}d)</span>` : `<span class="pill pill-bodega">Disponible</span>`;
+
+                return `
+                    <tr>
+                        <td><strong>${eq.codigoInventario}</strong></td>
+                        <td>${iconoCategoria(eq.categoria)} ${eq.categoria}</td>
+                        <td>${eq.marcaModelo}</td>
+                        <td><span style="font-family: monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${eq.numeroSerie}</span></td>
+                        <td>${badgeEstado}</td>
+                        <td>${fechaReg.toLocaleDateString('es-SV')}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Eventos Formularios
+        document.getElementById('form-equipo').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgObj = document.getElementById('msg-form');
+            const data = {
+                codigoInventario: document.getElementById('inp-codigo').value,
+                numeroSerie: document.getElementById('inp-serie').value,
+                categoria: document.getElementById('sel-categoria').value,
+                marcaModelo: document.getElementById('inp-marca').value
+            };
+
+            const res = await fetch(`${API_URL}/inventario`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                msgObj.textContent = '✅ Equipo ingresado a bodega correctamente';
+                msgObj.style.color = '#059669';
+                document.getElementById('form-equipo').reset();
+                cargarTodo();
+            } else {
+                const err = await res.json();
+                msgObj.textContent = '❌ ' + (err.error || 'Error al registrar');
+                msgObj.style.color = '#dc2626';
+            }
+            setTimeout(() => msgObj.textContent = '', 4000);
+        });
+
+        document.getElementById('form-asignar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgAsig = document.getElementById('msg-asignar');
+            const equipoId = document.getElementById('sel-equipo-disponible').value;
+            const usuarioId = document.getElementById('sel-empleado').value;
+
+            const res = await fetch(`${API_URL}/inventario/asignar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ equipoId, usuarioId })
+            });
+
+            if (res.ok) {
+                msgAsig.textContent = '✅ Equipo asignado al kit del empleado';
+                msgAsig.style.color = '#059669';
+                cargarTodo();
+            } else {
+                msgAsig.textContent = '❌ No se pudo asignar el equipo';
+                msgAsig.style.color = '#dc2626';
+            }
+            setTimeout(() => msgAsig.textContent = '', 4000);
+        });
+
+        async function devolverEquipo(equipoId) {
+            await fetch(`${API_URL}/inventario/devolver`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ equipoId, nuevoEstado: 'EN_BODEGA' })
+            });
+            cargarTodo();
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        cargarTodo();
+
+        // Renderizar Tabla de Auditoría / Bitácora
+                const tbodyAuditoria = document.getElementById('tbody-auditoria');
+                let todosLosHistoriales = [];
+                equiposGlobal.forEach(eq => {
+                    if (eq.historial) {
+                        eq.historial.forEach(h => {
+                            todosLosHistoriales.push({ ...h, codigoInventario: eq.codigoInventario });
+                        });
+                    }
+                });
+                todosLosHistoriales.sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn));
+
+                if (todosLosHistoriales.length === 0) {
+                    tbodyAuditoria.innerHTML = '<tr><td colspan="4">No hay movimientos registrados en la bitácora.</td></tr>';
+                } else {
+                    tbodyAuditoria.innerHTML = todosLosHistoriales.slice(0, 10).map(h => {
+                        const fechaHora = new Date(h.creadoEn).toLocaleString('es-SV');
+                        let pillClass = 'pill-bodega';
+                        if (h.accion === 'ASIGNADO') pillClass = 'pill-asignado';
+                        if (h.accion === 'DEVUELTO') pillClass = 'pill-alerta';
+
+                        return `
+                            <tr>
+                                <td>${fechaHora}</td>
+                                <td><strong>${h.codigoInventario}</strong></td>
+                                <td><span class="pill ${pillClass}">${h.accion}</span></td>
+                                <td>${h.detalle}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+    </script>
+</body>
+</html>
