@@ -334,6 +334,11 @@
                 }).join('');
 
                 renderizarTablaStock();
+                
+                // ¡AQUÍ ESTÁ LA SOLUCIÓN! 
+                // Llamamos a la bitácora DESPUÉS de que se descargaron los datos.
+                renderizarBitacora(); 
+
             } catch (error) {
                 console.error('Error al cargar inventario:', error);
             }
@@ -386,6 +391,42 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        // NUEVA FUNCIÓN: Envuelve la lógica de la bitácora
+        function renderizarBitacora() {
+            const tbodyAuditoria = document.getElementById('tbody-auditoria');
+            let todosLosHistoriales = [];
+            
+            equiposGlobal.forEach(eq => {
+                if (eq.historial) {
+                    eq.historial.forEach(h => {
+                        todosLosHistoriales.push({ ...h, codigoInventario: eq.codigoInventario });
+                    });
+                }
+            });
+            
+            todosLosHistoriales.sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn));
+
+            if (todosLosHistoriales.length === 0) {
+                tbodyAuditoria.innerHTML = '<tr><td colspan="4">No hay movimientos registrados en la bitácora.</td></tr>';
+            } else {
+                tbodyAuditoria.innerHTML = todosLosHistoriales.slice(0, 10).map(h => {
+                    const fechaHora = new Date(h.creadoEn).toLocaleString('es-SV');
+                    let pillClass = 'pill-bodega';
+                    if (h.accion === 'ASIGNADO') pillClass = 'pill-asignado';
+                    if (h.accion === 'DEVUELTO') pillClass = 'pill-alerta';
+
+                    return `
+                        <tr>
+                            <td>${fechaHora}</td>
+                            <td><strong>${h.codigoInventario}</strong></td>
+                            <td><span class="pill ${pillClass}">${h.accion}</span></td>
+                            <td>${h.detalle}</td>
+                        </tr> 
+                    `;
+                }).join('');
+            }
         }
 
         // Eventos Formularios
@@ -457,39 +498,8 @@
             window.location.href = 'login.html';
         });
 
+        // Llamada inicial
         cargarTodo();
-
-        // Renderizar Tabla de Auditoría / Bitácora
-                const tbodyAuditoria = document.getElementById('tbody-auditoria');
-                let todosLosHistoriales = [];
-                equiposGlobal.forEach(eq => {
-                    if (eq.historial) {
-                        eq.historial.forEach(h => {
-                            todosLosHistoriales.push({ ...h, codigoInventario: eq.codigoInventario });
-                        });
-                    }
-                });
-                todosLosHistoriales.sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn));
-
-                if (todosLosHistoriales.length === 0) {
-                    tbodyAuditoria.innerHTML = '<tr><td colspan="4">No hay movimientos registrados en la bitácora.</td></tr>';
-                } else {
-                    tbodyAuditoria.innerHTML = todosLosHistoriales.slice(0, 10).map(h => {
-                        const fechaHora = new Date(h.creadoEn).toLocaleString('es-SV');
-                        let pillClass = 'pill-bodega';
-                        if (h.accion === 'ASIGNADO') pillClass = 'pill-asignado';
-                        if (h.accion === 'DEVUELTO') pillClass = 'pill-alerta';
-
-                        return `
-                            <tr>
-                                <td>${fechaHora}</td>
-                                <td><strong>${h.codigoInventario}</strong></td>
-                                <td><span class="pill ${pillClass}">${h.accion}</span></td>
-                                <td>${h.detalle}</td>
-                            </tr>
-                        `;
-                    }).join('');
-                }
     </script>
 </body>
 </html>
