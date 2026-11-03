@@ -287,3 +287,85 @@ app.post('/api/inventario/devolver', autenticarToken, async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
+// ==========================================
+// RUTAS PARA TICKETS DE SOPORTE IT
+// ==========================================
+
+// 1. Crear un nuevo ticket (Empleado reporta un fallo)
+app.post('/api/tickets', async (req, res) => {
+  try {
+    const { asunto, descripcion, prioridad, usuarioId, equipoId } = req.body;
+    const nuevoTicket = await prisma.ticket.create({
+      data: {
+        asunto,
+        descripcion,
+        prioridad,
+        usuarioId: parseInt(usuarioId),
+        equipoId: equipoId ? parseInt(equipoId) : null
+      }
+    });
+    res.json(nuevoTicket);
+  } catch (error) {
+    console.error("Error al crear ticket:", error);
+    res.status(500).json({ error: "No se pudo crear el ticket" });
+  }
+});
+
+// 2. Leer todos los tickets (Dashboard de Soporte IT)
+app.get('/api/tickets', async (req, res) => {
+  try {
+    const tickets = await prisma.ticket.findMany({
+      include: {
+        usuario: { select: { nombre: true, email: true } },
+        equipo: { select: { codigoInventario: true, marcaModelo: true } } // <-- Aquí corregimos los nombres de los campos
+      },
+      orderBy: { creadoEn: 'desc' }
+    });
+    res.json(tickets);
+  } catch (error) {
+    console.error("Error al obtener tickets:", error);
+    res.status(500).json({ error: "No se pudieron cargar los tickets" });
+  }
+}); // <-- AQUÍ TERMINA EXACTAMENTE LA RUTA 2
+
+// 3. Actualizar el estado de un ticket (Soporte lo marca como Resuelto)
+app.put('/api/tickets/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+    const ticketActualizado = await prisma.ticket.update({
+      where: { id: parseInt(id) },
+      data: { estado }
+    });
+    res.json(ticketActualizado);
+  } catch (error) {
+    console.error("Error al actualizar ticket:", error);
+    res.status(500).json({ error: "No se pudo actualizar el ticket" });
+  }
+}); // <-- AQUÍ TERMINA EXACTAMENTE LA RUTA 3
+
+// ==========================================
+// RUTAS DE PANEL DE ADMINISTRADOR GLOBAL
+// ==========================================
+app.get('/api/admin/empleados', async (req, res) => {
+  try {
+    // Buscamos a todos los empleados y traemos su último registro de horario
+    const empleados = await prisma.usuario.findMany({
+      select: {
+        id: true,
+        nombre: true,
+        email: true,
+        cargo: true,
+        // Traemos solo el registro de horario más reciente para ver si están activos
+        horarios: {
+          orderBy: { horaEntrada: 'desc' },
+          take: 1
+        }
+      }
+    });
+    res.json(empleados);
+  } catch (error) {
+    console.error("Error al obtener la lista global de empleados:", error);
+    res.status(500).json({ error: "No se pudieron cargar los empleados." });
+  }
+});

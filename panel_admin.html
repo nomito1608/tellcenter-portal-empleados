@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Global | Tellcenter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style_mi_perfil.css">
+    <style>
+        .tc-box { background: #ffffff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0; margin-bottom: 24px; }
+        
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; margin-top: 20px; }
+        @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr; } }
+        .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-card h2 { font-size: 28px; margin-top: 4px; color: #0f172a; }
+        .kpi-card small { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+
+        .tc-table { width: 100%; border-collapse: collapse; }
+        .tc-table th { text-align: left; font-size: 11.5px; text-transform: uppercase; color: #64748b; padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+        .tc-table td { padding: 12px 10px; font-size: 13.5px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+
+        .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+        .pill-activo { background: #e0f8f9; color: #007a80; }
+        .pill-inactivo { background: #f1f5f9; color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+
+    <header class="mobile-bar">
+        <img src="img/logo-tellcenter-blanco.png" alt="Tellcenter">
+        <label for="menu-toggle" class="menu-icon"><span></span></label>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="mi_perfil.html" class="side-logo"><img src="img/logo-tellcenter-blanco.png" alt="Tellcenter"></a>
+        <nav class="nav">
+            <details>
+                <summary><span class="ico">🔐</span>Accesos<span class="chev">›</span></summary>
+                <div class="sub"><a href="mi_perfil.html">Mi perfil</a></div>
+            </details>
+            <details>
+                <summary><span class="ico">⏱️</span>Control de Horarios<span class="chev">›</span></summary>
+                <div class="sub"><a href="control_horario.html">Marcar entrada/salida</a></div>
+            </details>
+            <details>
+                <summary><span class="ico">📦</span>Inventario<span class="chev">›</span></summary>
+                <div class="sub"><a href="inventario.html">Gestión de Equipos</a></div>
+            </details>
+            <details>
+                <summary><span class="ico">🛠️</span>Soporte IT<span class="chev">›</span></summary>
+                <div class="sub"><a href="soporte.html">Tickets de Falla</a></div>
+            </details>
+            <!-- SECCIÓN EXCLUSIVA DE ADMIN -->
+            <details open>
+                <summary><span class="ico">👑</span>Administración<span class="chev">›</span></summary>
+                <div class="sub">
+                    <a href="panel_admin.html" class="active">Panel Global</a>
+                </div>
+            </details>
+        </nav>
+
+        <div class="side-user">
+            <div class="avatar" id="side-avatar">--</div>
+            <div>
+                <span id="side-name" style="display:block; font-weight:600;">Usuario</span>
+                <small id="side-cargo">Cargando...</small>
+            </div>
+        </div>
+        <div class="side-bottom">
+            <a href="#" id="btn-logout" title="Cerrar sesión">⏻</a>
+            <a href="#" title="Notificaciones">🔔</a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="content mp-page">
+        <div class="mp-top">
+            <h1>Panel Global de RRHH</h1>
+            <p>Monitorea a todos los colaboradores y su estado de jornada en tiempo real.</p>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div><small>Total Empleados Registrados</small><h2 id="kpi-total">0</h2></div>
+                <div style="font-size:24px;">👥</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>En Jornada Activa Ahora</small><h2 id="kpi-activos">0</h2></div>
+                <div style="font-size:24px;">🟢</div>
+            </div>
+            <div class="kpi-card">
+                <div><small>Fuera de Turno</small><h2 id="kpi-inactivos">0</h2></div>
+                <div style="font-size:24px;">⚪</div>
+            </div>
+        </div>
+
+        <section class="tc-box">
+            <h3 style="margin-bottom: 16px;">Directorio y Estado Actual</h3>
+            <table class="tc-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Colaborador</th>
+                        <th>Cargo</th>
+                        <th>Estado de Jornada</th>
+                        <th>Última Actividad</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-empleados">
+                    <tr><td colspan="5">Cargando directorio de empleados...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        const datosUsuarioString = localStorage.getItem('usuario');
+
+        if (!token || !datosUsuarioString) window.location.href = 'login.html';
+
+        const usuarioLogueado = JSON.parse(datosUsuarioString);
+
+        // Inicializar Sidebar
+        let iniciales = 'US';
+        if (usuarioLogueado.nombre) {
+            const partes = usuarioLogueado.nombre.trim().split(' ');
+            iniciales = partes.length >= 2 ? (partes[0][0] + partes[1][0]).toUpperCase() : partes[0].substring(0,2).toUpperCase();
+        }
+        document.getElementById('side-avatar').textContent = iniciales;
+        document.getElementById('side-name').textContent = usuarioLogueado.nombre ? usuarioLogueado.nombre.split(' ')[0] : 'Usuario';
+        document.getElementById('side-cargo').textContent = usuarioLogueado.cargo || 'Empleado';
+
+        async function cargarPanelAdmin() {
+            try {
+                const respuesta = await fetch(`${API_URL}/admin/empleados`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const empleados = await respuesta.json();
+                
+                let activos = 0;
+                let inactivos = 0;
+
+                const tabla = document.getElementById('tabla-empleados');
+                tabla.innerHTML = '';
+
+                empleados.forEach(emp => {
+                    let estadoActual = 'INACTIVO';
+                    let textoEstado = 'Fuera de turno';
+                    let ultimaHora = 'Sin registros';
+                    
+                    if (emp.horarios && emp.horarios.length > 0) {
+                        const ultimoRegistro = emp.horarios[0];
+                        if (ultimoRegistro.estado === 'EN_JORNADA') {
+                            estadoActual = 'ACTIVO';
+                            textoEstado = 'En Jornada';
+                            ultimaHora = new Date(ultimoRegistro.horaEntrada).toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' });
+                            activos++;
+                        } else {
+                            ultimaHora = 'Marcó salida';
+                            inactivos++;
+                        }
+                    } else {
+                        inactivos++;
+                    }
+
+                    const clasePill = estadoActual === 'ACTIVO' ? 'pill-activo' : 'pill-inactivo';
+
+                    tabla.innerHTML += `
+                        <tr>
+                            <td><strong>#${emp.id}</strong></td>
+                            <td>
+                                <strong style="color: #0f172a;">${emp.nombre}</strong><br>
+                                <small style="color: #64748b;">${emp.email}</small>
+                            </td>
+                            <td>${emp.cargo || 'No asignado'}</td>
+                            <td><span class="pill ${clasePill}">${textoEstado}</span></td>
+                            <td><span style="font-size: 12px; color: #64748b;">${ultimaHora}</span></td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('kpi-total').textContent = empleados.length;
+                document.getElementById('kpi-activos').textContent = activos;
+                document.getElementById('kpi-inactivos').textContent = inactivos;
+
+            } catch (error) {
+                console.error("Error cargando panel:", error);
+                document.getElementById('tabla-empleados').innerHTML = '<tr><td colspan="5">Error al cargar datos. Verifica el servidor.</td></tr>';
+            }
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', async (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        cargarPanelAdmin();
+    </script>
+</body>
+</html>

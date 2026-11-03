@@ -9,8 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style_mi_perfil.css">
     <style>
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; margin-top: 20px; }
-        @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; margin-top: 20px; }
+        @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr; } }
         .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         .kpi-card h2 { font-size: 28px; margin-top: 4px; color: #0f172a; }
         .kpi-card small { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
@@ -21,7 +21,8 @@
         @media (max-width: 980px) { .two-col-forms { grid-template-columns: 1fr; } }
 
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-        .tc-input, .tc-select { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: 'Outfit'; width: 100%; box-sizing: border-box; }
+        .tc-input, .tc-select, .tc-textarea { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: 'Outfit'; width: 100%; box-sizing: border-box; }
+        .tc-textarea { resize: vertical; min-height: 60px; grid-column: span 2; }
         .btn-primary { background: #00c4cc; color: #04242c; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-primary:hover { background: #00adb5; }
         .btn-dark { background: #091728; color: #ffffff; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
@@ -72,20 +73,25 @@
         <nav class="nav">
             <details>
                 <summary><span class="ico">🔐</span>Accesos<span class="chev">›</span></summary>
-                <div class="sub">
-                    <a href="mi_perfil.html">Mi perfil</a>
-                </div>
+                <div class="sub"><a href="mi_perfil.html">Mi perfil</a></div>
             </details>
             <details>
                 <summary><span class="ico">⏱️</span>Control de Horarios<span class="chev">›</span></summary>
-                <div class="sub">
-                    <a href="control_horario.html">Marcar entrada/salida</a>
-                </div>
+                <div class="sub"><a href="control_horario.html">Marcar entrada/salida</a></div>
             </details>
             <details open>
                 <summary><span class="ico">📦</span>Inventario<span class="chev">›</span></summary>
+                <div class="sub"><a href="inventario.html" class="active">Gestión de Equipos</a></div>
+            </details>
+            <details>
+                <summary><span class="ico">🛠️</span>Soporte IT<span class="chev">›</span></summary>
+                <div class="sub"><a href="soporte.html">Tickets de Falla</a></div>
+            </details>
+            <!-- SECCIÓN EXCLUSIVA DE ADMIN -->
+            <details>
+                <summary><span class="ico">👑</span>Administración<span class="chev">›</span></summary>
                 <div class="sub">
-                    <a href="inventario.html" class="active">Gestión de Equipos</a>
+                    <a href="panel_admin.html">Panel Global</a>
                 </div>
             </details>
         </nav>
@@ -107,45 +113,40 @@
     <main class="content mp-page">
         <div class="mp-top">
             <h1>Resumen y Stock de Inventario</h1>
-            <p>Monitoreo en tiempo real, filtros avanzados de búsqueda y asignación de Kits por empleado.</p>
+            <p>Monitoreo de activos tecnológicos, control de costos operativos y asignación de Kits.</p>
         </div>
 
-        <!-- Dashboard KPI -->
+        <!-- Dashboard KPI Modificado según feedback de Velado -->
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div><small>Total de Equipos</small><h2 id="kpi-total">0</h2></div>
+                <div><small>Total de Equipos Físicos</small><h2 id="kpi-total">0</h2></div>
                 <div style="font-size:24px;">📦</div>
             </div>
             <div class="kpi-card">
-                <div><small>Asignados a Empleados</small><h2 id="kpi-asignado">0</h2></div>
+                <div><small>Asignados a Colaboradores</small><h2 id="kpi-asignado">0</h2></div>
                 <div style="font-size:24px;">👤</div>
             </div>
             <div class="kpi-card">
                 <div><small>Disponibles en Bodega</small><h2 id="kpi-bodega">0</h2></div>
                 <div style="font-size:24px;">✅</div>
             </div>
-            <div class="kpi-card">
-                <div><small>En Mantenimiento</small><h2 id="kpi-mant">0</h2></div>
-                <div style="font-size:24px;">🛠️</div>
-            </div>
         </div>
 
         <!-- Formularios Alta y Asignación -->
         <div class="two-col-forms">
             <section class="tc-box">
-                <h3 style="margin-bottom: 12px;">1. Ingresar Nuevo Equipo a Bodega</h3>
+                <h3 style="margin-bottom: 12px;">Ingresar Nuevo Equipo a Bodega</h3>
                 <form id="form-equipo">
                     <div class="form-grid-2">
                         <input type="text" id="inp-codigo" class="tc-input" placeholder="Código (ej. TC-LAP-001)" required>
                         <input type="text" id="inp-serie" class="tc-input" placeholder="Número de Serie" required>
-                        <select id="sel-categoria" class="tc-select" required>
-                            <option value="">Categoría...</option>
-                            <option value="Laptop">💻 Laptop / PC</option>
-                            <option value="Headset">🎧 Headset</option>
-                            <option value="Monitor">🖥️ Monitor</option>
-                            <option value="Periférico">⌨️ Periférico / UPS</option>
-                        </select>
+                        <!-- Selector de categoría ahora permite ingresar nuevos tipos visualmente -->
+                        <input type="text" id="sel-categoria" class="tc-input" placeholder="Categoría (Laptop, Monitor, Cable HDMI, etc.)" required>
                         <input type="text" id="inp-marca" class="tc-input" placeholder="Marca y Modelo" required>
+                        
+                        <!-- Nuevos campos financieros y técnicos (BI) -->
+                        <input type="number" id="inp-costo" step="0.01" class="tc-input" placeholder="Costo de Compra en USD ($)">
+                        <textarea id="inp-comentarios" class="tc-textarea" placeholder="Especificaciones, notas o estado del equipo..."></textarea>
                     </div>
                     <button type="submit" class="btn-primary">+ Registrar en Bodega</button>
                     <p id="msg-form" style="margin-top: 10px; font-size: 13px; font-weight: 600;"></p>
@@ -171,24 +172,17 @@
 
         <!-- Kits por Empleado -->
         <section class="tc-box">
-            <h3 style="margin-bottom: 4px;">👤 Kits de Equipos Bajo Resguardo por Colaborador</h3>
-            <p style="font-size: 13px; color: #64748b;">Vista agrupada por empleado con control rápido de devolución.</p>
+            <h3 style="margin-bottom: 4px;">👤 Kits de Equipos Bajo Resguardo</h3>
             <div class="kits-grid" id="contenedor-kits">
                 <p>Cargando kits de empleados...</p>
             </div>
         </section>
 
-        <!-- Catálogo Maestro con Filtros -->
+        <!-- Catálogo Maestro -->
         <section class="tc-box">
             <div class="filter-toolbar">
                 <h3 style="margin:0;">📦 Stock en Bodega Central IT</h3>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filtrarCategoria('TODOS')">Todos</button>
-                    <button class="filter-btn" onclick="filtrarCategoria('Laptop')">Laptops</button>
-                    <button class="filter-btn" onclick="filtrarCategoria('Headset')">Headsets</button>
-                    <button class="filter-btn" onclick="filtrarCategoria('Monitor')">Monitores</button>
-                </div>
-                <input type="text" id="input-buscar" class="search-input" placeholder="🔍 Buscar por código o serie..." oninput="filtrarBusqueda()">
+                <input type="text" id="input-buscar" class="search-input" placeholder="🔍 Buscar por código, serie o marca..." oninput="filtrarBusqueda()">
             </div>
             
             <table class="tc-table">
@@ -197,21 +191,19 @@
                         <th>Código</th>
                         <th>Categoría</th>
                         <th>Marca y Modelo</th>
-                        <th>N° Serie</th>
+                        <th>Costo ($)</th>
                         <th>Estado / Antigüedad</th>
-                        <th>Fecha Registro</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-equipos">
-                    <tr><td colspan="6">Cargando stock en bodega...</td></tr>
+                    <tr><td colspan="5">Cargando stock en bodega...</td></tr>
                 </tbody>
             </table>
         </section>
 
-        <!-- FASE 3: Bitácora de Movimientos y Auditoría -->
+        <!-- Bitácora -->
         <section class="tc-box">
             <h3 style="margin-bottom: 6px;">📋 Bitácora de Movimientos y Auditoría</h3>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 14px;">Registro histórico de trazabilidad de todos los activos tecnológicos.</p>
             <table class="tc-table">
                 <thead>
                     <tr>
@@ -237,9 +229,7 @@
         if (!token || !usuarioGuardado) window.location.href = 'login.html';
 
         const usuario = JSON.parse(usuarioGuardado || '{}');
-
         let equiposGlobal = [];
-        let categoriaActiva = 'TODOS';
 
         // Inicializar Sidebar
         let iniciales = 'US';
@@ -269,45 +259,48 @@
                 equiposGlobal = await resInv.json();
                 const empleados = await resKits.json();
 
-                // KPIs
+                // KPIs actualizados sin "Mantenimiento"
                 const disponibles = equiposGlobal.filter(e => e.estado === 'EN_BODEGA');
                 const asignados = equiposGlobal.filter(e => e.estado === 'ASIGNADO');
-                const mant = equiposGlobal.filter(e => e.estado === 'MANTENIMIENTO');
 
                 document.getElementById('kpi-total').textContent = equiposGlobal.length;
                 document.getElementById('kpi-asignado').textContent = asignados.length;
                 document.getElementById('kpi-bodega').textContent = disponibles.length;
-                document.getElementById('kpi-mant').textContent = mant.length;
 
                 // Selectores
                 const selEquipo = document.getElementById('sel-equipo-disponible');
                 selEquipo.innerHTML = disponibles.length === 0 ? '<option value="">No hay equipos libres en bodega...</option>' :
                     '<option value="">Seleccionar equipo disponible en bodega...</option>' +
-                    disponibles.map(eq => `<option value="${eq.id}">${eq.codigoInventario} — ${eq.marcaModelo} (${eq.categoria})</option>`).join('');
+                    disponibles.map(eq => `<option value="${eq.id}">${eq.codigoInventario} — ${eq.marcaModelo}</option>`).join('');
 
                 const selEmpleado = document.getElementById('sel-empleado');
                 selEmpleado.innerHTML = '<option value="">Seleccionar empleado de Tellcenter...</option>' +
-                    empleados.map(emp => `<option value="${emp.id}">${emp.nombre} (${emp.cuenta} · ${emp.modalidad})</option>`).join('');
+                    empleados.map(emp => `<option value="${emp.id}">${emp.nombre} (${emp.cuenta})</option>`).join('');
 
-                // Renderizar Kits
+                // Renderizar Kits con cálculo de Costo Total
                 document.getElementById('contenedor-kits').innerHTML = empleados.map(emp => {
                     const partes = (emp.nombre || 'US').trim().split(' ');
                     const ini = partes.length >= 2 ? (partes[0][0] + partes[1][0]).toUpperCase() : partes[0].substring(0,2).toUpperCase();
                     const listaEquipos = emp.equipos || [];
+                    
+                    let costoTotalKit = 0;
 
-                    const itemsHtml = listaEquipos.length === 0 ? '<div class="kit-item"><span style="color:#94a3b8;">Sin equipos asignados actualmente</span></div>' :
-                        listaEquipos.map(eq => `
-                            <div class="kit-item">
-                                <div>
-                                    <strong>${iconoCategoria(eq.categoria)} ${eq.marcaModelo}</strong>
-                                    <small>${eq.codigoInventario} · Serie: ${eq.numeroSerie}</small>
+                    const itemsHtml = listaEquipos.length === 0 ? '<div class="kit-item"><span style="color:#94a3b8;">Sin equipos asignados</span></div>' :
+                        listaEquipos.map(eq => {
+                            if (eq.costoCompra) costoTotalKit += eq.costoCompra;
+                            return `
+                                <div class="kit-item">
+                                    <div>
+                                        <strong>${iconoCategoria(eq.categoria)} ${eq.marcaModelo}</strong>
+                                        <small>${eq.codigoInventario} · Serie: ${eq.numeroSerie}</small>
+                                        ${eq.comentarios ? `<small style="color:#009ba3;">📝 ${eq.comentarios}</small>` : ''}
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <button class="btn-mini-return" onclick="devolverEquipo(${eq.id})">↩ Bodega</button>
+                                    </div>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <span class="pill pill-asignado">Activo</span>
-                                    <button class="btn-mini-return" onclick="devolverEquipo(${eq.id})">↩ Bodega</button>
-                                </div>
-                            </div>
-                        `).join('');
+                            `;
+                        }).join('');
 
                     return `
                         <div class="kit-card">
@@ -319,24 +312,17 @@
                                         <small style="display:block;color:#64748b;font-size:12px;">${emp.email}</small>
                                         <div class="kit-meta">
                                             <span class="pill pill-asignado">${emp.cuenta}</span>
-                                            <span class="pill pill-bodega">${emp.modalidad}</span>
+                                            <span class="pill pill-bodega" style="background:#fef2f2; color:#b91c1c;">$${costoTotalKit.toFixed(2)} USD</span>
                                         </div>
                                     </div>
                                 </div>
                                 ${itemsHtml}
-                            </div>
-                            <div class="kit-footer">
-                                <span style="color:#64748b;">${listaEquipos.length} equipo(s) bajo resguardo</span>
-                                <strong style="color:#009ba3;">Kit Verificado ✓</strong>
                             </div>
                         </div>
                     `;
                 }).join('');
 
                 renderizarTablaStock();
-                
-                // ¡AQUÍ ESTÁ LA SOLUCIÓN! 
-                // Llamamos a la bitácora DESPUÉS de que se descargaron los datos.
                 renderizarBitacora(); 
 
             } catch (error) {
@@ -344,56 +330,45 @@
             }
         }
 
-        // Filtrar por pestañas de categoría
-        function filtrarCategoria(cat) {
-            categoriaActiva = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(cat.toLowerCase()) || (cat === 'TODOS' && btn.textContent === 'Todos'));
-            });
-            renderizarTablaStock();
-        }
-
-        // Filtrar por barra de búsqueda
         function filtrarBusqueda() {
             renderizarTablaStock();
         }
 
-        // Renderizar tabla con filtros aplicados y alertas de antigüedad
         function renderizarTablaStock() {
             const textoBusqueda = document.getElementById('input-buscar').value.toLowerCase();
             const disponibles = equiposGlobal.filter(e => e.estado === 'EN_BODEGA');
 
             const filtrados = disponibles.filter(eq => {
-                const matchCat = categoriaActiva === 'TODOS' || eq.categoria.toLowerCase() === categoriaActiva.toLowerCase();
-                const matchTexto = eq.codigoInventario.toLowerCase().includes(textoBusqueda) || eq.numeroSerie.toLowerCase().includes(textoBusqueda) || eq.marcaModelo.toLowerCase().includes(textoBusqueda);
-                return matchCat && matchTexto;
+                return eq.codigoInventario.toLowerCase().includes(textoBusqueda) || 
+                       eq.numeroSerie.toLowerCase().includes(textoBusqueda) || 
+                       eq.marcaModelo.toLowerCase().includes(textoBusqueda) ||
+                       eq.categoria.toLowerCase().includes(textoBusqueda);
             });
 
             const tbody = document.getElementById('tbody-equipos');
             if (filtrados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6">No se encontraron equipos en bodega con estos filtros.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5">No se encontraron equipos.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = filtrados.map(eq => {
                 const fechaReg = new Date(eq.creadoEn);
                 const diasEnBodega = Math.floor((new Date() - fechaReg) / (1000 * 60 * 60 * 24));
-                const badgeEstado = diasEnBodega > 30 ? `<span class="pill pill-alerta" title="Más de 30 días en bodega">⚠️ Stock Antiguo (${diasEnBodega}d)</span>` : `<span class="pill pill-bodega">Disponible</span>`;
+                const badgeEstado = diasEnBodega > 30 ? `<span class="pill pill-alerta">⚠️ Antiguo (${diasEnBodega}d)</span>` : `<span class="pill pill-bodega">Disponible</span>`;
+                const costoStr = eq.costoCompra ? `$${eq.costoCompra.toFixed(2)}` : 'N/A';
 
                 return `
                     <tr>
                         <td><strong>${eq.codigoInventario}</strong></td>
                         <td>${iconoCategoria(eq.categoria)} ${eq.categoria}</td>
                         <td>${eq.marcaModelo}</td>
-                        <td><span style="font-family: monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${eq.numeroSerie}</span></td>
+                        <td><strong>${costoStr}</strong></td>
                         <td>${badgeEstado}</td>
-                        <td>${fechaReg.toLocaleDateString('es-SV')}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // NUEVA FUNCIÓN: Envuelve la lógica de la bitácora
         function renderizarBitacora() {
             const tbodyAuditoria = document.getElementById('tbody-auditoria');
             let todosLosHistoriales = [];
@@ -409,7 +384,7 @@
             todosLosHistoriales.sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn));
 
             if (todosLosHistoriales.length === 0) {
-                tbodyAuditoria.innerHTML = '<tr><td colspan="4">No hay movimientos registrados en la bitácora.</td></tr>';
+                tbodyAuditoria.innerHTML = '<tr><td colspan="4">No hay movimientos registrados.</td></tr>';
             } else {
                 tbodyAuditoria.innerHTML = todosLosHistoriales.slice(0, 10).map(h => {
                     const fechaHora = new Date(h.creadoEn).toLocaleString('es-SV');
@@ -429,7 +404,7 @@
             }
         }
 
-        // Eventos Formularios
+        // Eventos Formularios con nuevos campos
         document.getElementById('form-equipo').addEventListener('submit', async (e) => {
             e.preventDefault();
             const msgObj = document.getElementById('msg-form');
@@ -437,7 +412,9 @@
                 codigoInventario: document.getElementById('inp-codigo').value,
                 numeroSerie: document.getElementById('inp-serie').value,
                 categoria: document.getElementById('sel-categoria').value,
-                marcaModelo: document.getElementById('inp-marca').value
+                marcaModelo: document.getElementById('inp-marca').value,
+                costoCompra: document.getElementById('inp-costo').value,
+                comentarios: document.getElementById('inp-comentarios').value
             };
 
             const res = await fetch(`${API_URL}/inventario`, {
@@ -498,7 +475,6 @@
             window.location.href = 'login.html';
         });
 
-        // Llamada inicial
         cargarTodo();
     </script>
 </body>

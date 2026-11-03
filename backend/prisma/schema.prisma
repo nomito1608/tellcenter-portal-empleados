@@ -22,6 +22,7 @@ model Usuario {
   sesiones  Sesion[]
   horarios  ControlHorario[]
   equipos   Equipo[]
+  tickets     Ticket[]
 }
 
 model Sesion {
@@ -54,12 +55,15 @@ model Equipo {
   marcaModelo      String
   numeroSerie      String    @unique
   estado           String    @default("EN_BODEGA")
+  costoCompra      Float?    // <-- NUEVO: Para costear escalar proyectos (BI)
+  comentarios      String?   // <-- NUEVO: Para specs, cables nuevos o notas de fichaje
   usuarioId        Int?
   usuario          Usuario?  @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
   fechaAsignacion  DateTime?
   creadoEn         DateTime  @default(now())
 
   historial        HistorialEquipo[]
+  tickets          Ticket[]
 }
 
 model HistorialEquipo {
@@ -70,3 +74,19 @@ model HistorialEquipo {
   detalle     String
   creadoEn    DateTime @default(now())
 } 
+
+model Ticket {
+  id          Int      @id @default(autoincrement())
+  asunto      String
+  descripcion String
+  estado      String   @default("ABIERTO") // ABIERTO, EN_PROCESO, RESUELTO
+  prioridad   String   @default("MEDIA")   // BAJA, MEDIA, ALTA
+  creadoEn    DateTime @default(now())
+
+  // Relaciones
+  usuarioId   Int
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  
+  equipoId    Int?     // Opcional: por si el fallo es de un equipo específico
+  equipo      Equipo?  @relation(fields: [equipoId], references: [id])
+}
