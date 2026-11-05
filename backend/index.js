@@ -215,10 +215,14 @@ app.get('/api/inventario', autenticarToken, async (req, res) => {
 
 app.post('/api/inventario', autenticarToken, async (req, res) => {
   try {
-    const { codigoInventario, categoria, marcaModelo, numeroSerie } = req.body;
+    const { codigoInventario, categoria, marcaModelo, numeroSerie, costoCompra } = req.body;
     const nuevoEquipo = await prisma.equipo.create({
       data: {
-        codigoInventario, categoria, marcaModelo, numeroSerie,
+        codigoInventario, 
+        categoria, 
+        marcaModelo, 
+        numeroSerie,
+        costoCompra: costoCompra ? parseFloat(costoCompra) : null, // <-- Asegurar que guarde el costo
         historial: {
           create: { accion: 'REGISTRADO', detalle: 'Equipo ingresado a Bodega Central IT' }
         }
