@@ -182,7 +182,11 @@
         <section class="tc-box">
             <div class="filter-toolbar">
                 <h3 style="margin:0;">📦 Stock en Bodega Central IT</h3>
-                <input type="text" id="input-buscar" class="search-input" placeholder="🔍 Buscar por código, serie o marca..." oninput="filtrarBusqueda()">
+                <!-- AQUÍ SE AGREGÓ EL BOTÓN DE EXPORTAR -->
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="input-buscar" class="search-input" placeholder="🔍 Buscar por código, serie o marca..." oninput="filtrarBusqueda()">
+                    <button onclick="descargarExcel()" class="btn-primary" style="padding: 8px 14px; font-size: 13px;">📥 Exportar Reporte</button>
+                </div>
             </div>
             
             <table class="tc-table">
@@ -474,6 +478,30 @@
             localStorage.clear();
             window.location.href = 'login.html';
         });
+
+        // AQUÍ SE AGREGÓ LA FUNCIÓN DE EXPORTAR
+        async function descargarExcel() {
+            try {
+                const res = await fetch(`${API_URL}/inventario/exportar`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!res.ok) throw new Error("Error al descargar");
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Reporte_Inventario_Tellcenter.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error generando Excel:", error);
+                alert("Ocurrió un error al intentar descargar el reporte.");
+            }
+        }
 
         cargarTodo();
     </script>
