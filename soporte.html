@@ -36,7 +36,7 @@
         <label for="menu-toggle" class="menu-icon"><span></span></label>
     </header>
 
-    <!-- SIDEBAR COMPLETO PARA PODER REGRESAR -->
+    <!-- SIDEBAR -->
     <aside class="sidebar">
         <a href="mi_perfil.html" class="side-logo"><img src="img/logo-tellcenter-blanco.png" alt="Tellcenter"></a>
         <nav class="nav">
@@ -45,14 +45,10 @@
                 <div class="sub"><a href="mi_perfil.html">Mi perfil</a></div>
             </details>
             <details>
-                <summary><span class="ico">📰</span>Portal de Noticias<span class="chev">›</span></summary>
-                <div class="sub"><a href="#">Noticias</a></div>
-            </details>
-            <details>
                 <summary><span class="ico">⏱️</span>Control de Horarios<span class="chev">›</span></summary>
                 <div class="sub"><a href="control_horario.html">Marcar entrada/salida</a></div>
             </details>
-         <details>
+            <details>
                 <summary><span class="ico">📦</span>Inventario<span class="chev">›</span></summary>
                 <div class="sub">
                     <a href="inventario.html">Gestión de Equipos</a>
@@ -64,8 +60,6 @@
                     <a href="soporte.html" class="active">Tickets de Falla</a>
                 </div>
             </details>
-            
-
             <!-- SECCIÓN EXCLUSIVA DE ADMIN -->
             <details>
                 <summary><span class="ico">👑</span>Administración<span class="chev">›</span></summary>
@@ -73,7 +67,6 @@
                     <a href="panel_admin.html">Panel Global</a>
                 </div>
             </details>
-            
         </nav>
 
         <div class="side-user">
@@ -98,7 +91,7 @@
 
         <!-- Formulario de Nuevo Ticket -->
         <section class="tc-box" style="max-width: 800px;">
-            <h3 style="margin-bottom: 16px;">1. Reportar Falla de Equipo</h3>
+            <h3 style="margin-bottom: 16px;">Reportar Falla de Equipo</h3>
             <form id="form-ticket" style="display: flex; flex-direction: column; gap: 14px;">
                 <div>
                     <label style="font-size: 13px; font-weight: 600; color: #475569;">Asunto del problema:</label>
@@ -117,12 +110,13 @@
                     </select>
                 </div>
                 <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 5px;">+ Generar Ticket de Soporte</button>
+                <p id="msg-ticket" style="font-size: 13px; font-weight: 600; margin-top: 4px;"></p>
             </form>
         </section>
 
         <!-- Dashboard de Tickets -->
         <section class="tc-box">
-            <h3 style="margin-bottom: 16px;">2. Dashboard de Tickets Activos</h3>
+            <h3 style="margin-bottom: 16px;">Dashboard de Tickets Activos</h3>
             <table class="tc-table">
                 <thead>
                     <tr>
@@ -165,12 +159,14 @@
 
         async function cargarTickets() {
             try {
-                const respuesta = await fetch(`${API_URL}/tickets`);
+                const respuesta = await fetch(`${API_URL}/tickets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const tickets = await respuesta.json();
                 
                 const tabla = document.getElementById('tabla-tickets');
                 
-                if(tickets.length === 0) {
+                if(!Array.isArray(tickets) || tickets.length === 0) {
                     tabla.innerHTML = '<tr><td colspan="5">No hay tickets registrados.</td></tr>';
                     return;
                 }
@@ -197,11 +193,13 @@
                 });
             } catch (error) {
                 console.error("Error cargando tickets:", error);
+                document.getElementById('tabla-tickets').innerHTML = '<tr><td colspan="5">Error al cargar tickets desde el servidor.</td></tr>';
             }
         }
 
         document.getElementById('form-ticket').addEventListener('submit', async (e) => {
             e.preventDefault(); 
+            const msgObj = document.getElementById('msg-ticket');
             
             const nuevoTicket = {
                 asunto: document.getElementById('asunto').value,
@@ -210,23 +208,48 @@
                 usuarioId: usuarioActualId
             };
 
-            await fetch(`${API_URL}/tickets`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nuevoTicket)
-            });
+            try {
+                const res = await fetch(`${API_URL}/tickets`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(nuevoTicket)
+                });
 
-            document.getElementById('form-ticket').reset();
-            cargarTickets(); 
+                if (res.ok) {
+                    msgObj.textContent = '✅ Ticket de soporte generado con éxito';
+                    msgObj.style.color = '#059669';
+                    document.getElementById('form-ticket').reset();
+                    cargarTickets();
+                } else {
+                    msgObj.textContent = '❌ Error al generar el ticket';
+                    msgObj.style.color = '#dc2626';
+                }
+            } catch (err) {
+                console.error("Error:", err);
+                msgObj.textContent = '❌ Error de conexión con el servidor';
+                msgObj.style.color = '#dc2626';
+            }
+
+            setTimeout(() => msgObj.textContent = '', 4000);
         });
 
         async function resolverTicket(idTicket) {
-            await fetch(`${API_URL}/tickets/${idTicket}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: 'RESUELTO' })
-            });
-            cargarTickets(); 
+            try {
+                await fetch(`${API_URL}/tickets/${idTicket}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ estado: 'RESUELTO' })
+                });
+                cargarTickets(); 
+            } catch (error) {
+                console.error("Error al resolver ticket:", error);
+            }
         }
 
         document.getElementById('btn-logout').addEventListener('click', async (e) => {

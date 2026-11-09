@@ -13,9 +13,15 @@
         
         .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; margin-top: 20px; }
         @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr; } }
-        .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         .kpi-card h2 { font-size: 28px; margin-top: 4px; color: #0f172a; }
         .kpi-card small { color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+
+        /* Barra de accesos directos gerenciales para Adriana */
+        .admin-toolbar { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 20px; border-radius: 12px; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+        .admin-shortcuts { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-shortcut { background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-shortcut:hover { background: #00c4cc; color: #04242c; border-color: #00adb5; }
 
         .tc-table { width: 100%; border-collapse: collapse; }
         .tc-table th { text-align: left; font-size: 11.5px; text-transform: uppercase; color: #64748b; padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
@@ -84,6 +90,20 @@
             <p>Monitorea a todos los colaboradores y su estado de jornada en tiempo real.</p>
         </div>
 
+        <!-- BARRA DE ACCESOS RÁPIDOS PARA GERENCIA / ADMIN -->
+        <div class="admin-toolbar">
+            <div>
+                <strong style="font-size: 14px; color: #0f172a; display: block;">Acceso Rápido Gerencial</strong>
+                <small style="color: #64748b;">Navegación directa a módulos clave de supervisión</small>
+            </div>
+            <div class="admin-shortcuts">
+                <a href="inventario.html" class="btn-shortcut">📦 Ver Inventario y Costos</a>
+                <a href="soporte.html" class="btn-shortcut">🛠️ Revisar Soporte IT</a>
+                <a href="control_horario.html" class="btn-shortcut">⏱️ Control de Asistencia</a>
+            </div>
+        </div>
+
+        <!-- KPIs GLOBALES -->
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div><small>Total Empleados Registrados</small><h2 id="kpi-total">0</h2></div>
@@ -99,8 +119,9 @@
             </div>
         </div>
 
+        <!-- DIRECTORIO Y ESTADO -->
         <section class="tc-box">
-            <h3 style="margin-bottom: 16px;">Directorio y Estado Actual</h3>
+            <h3 style="margin-bottom: 16px;">Directorio y Estado Actual de Colaboradores</h3>
             <table class="tc-table">
                 <thead>
                     <tr>
@@ -143,6 +164,8 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
+                if (!respuesta.ok) throw new Error('No autorizado o error en servidor');
+
                 const empleados = await respuesta.json();
                 
                 let activos = 0;
@@ -193,7 +216,7 @@
 
             } catch (error) {
                 console.error("Error cargando panel:", error);
-                document.getElementById('tabla-empleados').innerHTML = '<tr><td colspan="5">Error al cargar datos. Verifica el servidor.</td></tr>';
+                document.getElementById('tabla-empleados').innerHTML = '<tr><td colspan="5">Error al cargar datos. Verifica el servidor o tus permisos de administrador.</td></tr>';
             }
         }
 
