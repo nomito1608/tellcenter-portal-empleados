@@ -26,27 +26,31 @@
         .tc-textarea { resize: vertical; min-height: 60px; grid-column: span 2; }
         .btn-primary { background: #00c4cc; color: #04242c; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-primary:hover { background: #00adb5; }
-        .btn-dark { background: #091728; color: #ffffff; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-dark { background: #091728; color: #ffffff; padding: 11px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-dark:hover { background: #162a45; }
+
+        /* Barra superior con simulador de rol para demostración */
+        .mp-top-flex { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+        .role-switch-badge { background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 10px; font-size: 12.5px; display: flex; align-items: center; gap: 8px; color: #334155; }
+        .btn-role-toggle { background: #091728; color: #fff; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+        .btn-role-toggle:hover { background: #00c4cc; color: #04242c; }
 
         /* Barra de Filtros y Búsqueda */
         .filter-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-        .filter-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-        .filter-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 6px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .filter-btn.active, .filter-btn:hover { background: #00c4cc; color: #04242c; border-color: #00adb5; }
         .search-input { padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; font-family: 'Outfit'; width: 260px; }
 
         /* Tarjetas de Kits por Empleado */
-        .kits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-top: 14px; }
+        .kits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; margin-top: 14px; }
         .kit-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between; }
         .kit-header { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; margin-bottom: 14px; }
         .kit-avatar { width: 44px; height: 44px; border-radius: 50%; background: #00c4cc; color: #04242c; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .kit-meta { display: flex; gap: 6px; margin-top: 5px; }
+        .kit-meta { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
         .kit-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; font-size: 13px; border: 1px solid #f1f5f9; }
         .kit-item small { color: #64748b; display: block; font-size: 11.5px; margin-top: 2px; }
-        .kit-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; font-size: 12.5px; }
         .btn-mini-return { background: #fff; border: 1px solid #cbd5e1; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
         .btn-mini-return:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+        .btn-mini-print { background: #fff; border: 1px solid #cbd5e1; color: #0f172a; padding: 4px 7px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        .btn-mini-print:hover { background: #e0f8f9; border-color: #00c4cc; }
 
         /* Tabla limpia */
         .tc-table { width: 100%; border-collapse: collapse; }
@@ -56,6 +60,7 @@
         .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
         .pill-bodega { background: #ecfdf5; color: #059669; }
         .pill-asignado { background: #e0f8f9; color: #007a80; }
+        .pill-remoto { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
         .pill-alerta { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
     </style>
 </head>
@@ -89,7 +94,7 @@
                 <div class="sub"><a href="soporte.html">Tickets de Falla</a></div>
             </details>
             <!-- SECCIÓN EXCLUSIVA DE ADMIN -->
-            <details>
+            <details id="nav-admin-section">
                 <summary><span class="ico">👑</span>Administración<span class="chev">›</span></summary>
                 <div class="sub">
                     <a href="panel_admin.html">Panel Global</a>
@@ -112,13 +117,20 @@
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="content mp-page">
-        <div class="mp-top">
-            <h1>Resumen y Stock de Inventario</h1>
-            <p>Monitoreo de activos tecnológicos, control de costos operativos y asignación de Kits.</p>
+        <div class="mp-top mp-top-flex">
+            <div>
+                <h1 id="titulo-pagina">Resumen y Stock de Inventario</h1>
+                <p id="subtitulo-pagina">Monitoreo de activos tecnológicos, control de costos operativos y asignación de Kits.</p>
+            </div>
+            <!-- Botón para alternar vista en la demo de Velado/Adriana -->
+            <div class="role-switch-badge">
+                <span>Vista actual: <strong id="lbl-vista-actual">👑 Admin (Adriana)</strong></span>
+                <button type="button" class="btn-role-toggle" onclick="alternarVistaDemo()">🔄 Cambiar Vista</button>
+            </div>
         </div>
 
-        <!-- Dashboard KPI con Valor Financiero Integrado -->
-        <div class="kpi-grid">
+        <!-- Dashboard KPI con Valor Financiero Integrado (SOLO ADMIN) -->
+        <div class="kpi-grid admin-only">
             <div class="kpi-card">
                 <div><small>Total de Equipos Físicos</small><h2 id="kpi-total">0</h2></div>
                 <div style="font-size:24px;">📦</div>
@@ -133,7 +145,7 @@
             </div>
             <div class="kpi-card">
                 <div>
-                    <small>Valor Total Inventario</small>
+                    <small>Inversión Total Empresa</small>
                     <h2 id="kpi-valor-total" style="color: #0284c7;">$0.00</h2>
                     <small id="kpi-valor-bodega" style="color: #059669; font-weight: 700; display: block; margin-top: 2px; text-transform: none;">En bodega: $0.00</small>
                 </div>
@@ -141,22 +153,33 @@
             </div>
         </div>
 
-        <!-- Formularios Alta y Asignación -->
-        <div class="two-col-forms">
+        <!-- Formularios Alta y Asignación (SOLO ADMIN) -->
+        <div class="two-col-forms admin-only">
             <section class="tc-box">
-                <h3 style="margin-bottom: 12px;">Ingresar Nuevo Equipo a Bodega</h3>
+                <h3 style="margin-bottom: 12px;">1. Ingresar Nuevo Equipo o Activo</h3>
                 <form id="form-equipo">
                     <div class="form-grid-2">
-                        <input type="text" id="inp-codigo" class="tc-input" placeholder="Código (ej. TC-LAP-001)" required>
+                        <!-- Selector de Categoría primero para sugerir prefijo y detectar Equipo Propio -->
+                        <input type="text" id="sel-categoria" list="lista-categorias" class="tc-input" placeholder="Categoría (Elige o escribe...)" oninput="ajustarPorCategoria()" required>
+                        <datalist id="lista-categorias">
+                            <option value="Estación / Kit Completo (CPU + Monitor + Periféricos)">
+                            <option value="Laptop / Computadora">
+                            <option value="Monitor">
+                            <option value="UPS / Respaldo de Energía">
+                            <option value="Headset / Audio">
+                            <option value="Periféricos (Teclado / Mouse / Cables)">
+                            <option value="Equipo Propio (Remoto - $0.00)">
+                        </datalist>
+
+                        <input type="text" id="inp-codigo" class="tc-input" placeholder="Código Etiqueta (ej. TC-0001)" required>
                         <input type="text" id="inp-serie" class="tc-input" placeholder="Número de Serie" required>
-                        <input type="text" id="sel-categoria" class="tc-input" placeholder="Categoría (Laptop, Monitor, Cable HDMI, etc.)" required>
                         <input type="text" id="inp-marca" class="tc-input" placeholder="Marca y Modelo" required>
                         
-                        <!-- Nuevos campos financieros y técnicos (BI) -->
-                        <input type="number" id="inp-costo" step="0.01" class="tc-input" placeholder="Costo de Compra en USD ($)">
-                        <textarea id="inp-comentarios" class="tc-textarea" placeholder="Especificaciones, notas o estado del equipo..."></textarea>
+                        <!-- Campos financieros y técnicos (BI) -->
+                        <input type="number" id="inp-costo" step="0.01" min="0" class="tc-input" placeholder="Costo Unitario en USD ($)">
+                        <textarea id="inp-comentarios" class="tc-textarea" placeholder="Especificaciones (ej. Incluye mouse/teclado, estado físico o si pertenece al empleado en modo remoto)..."></textarea>
                     </div>
-                    <button type="submit" class="btn-primary">+ Registrar en Bodega</button>
+                    <button type="submit" class="btn-primary">+ Registrar Activo</button>
                     <p id="msg-form" style="margin-top: 10px; font-size: 13px; font-weight: 600;"></p>
                 </form>
             </section>
@@ -178,42 +201,47 @@
             </section>
         </div>
 
-        <!-- Kits por Empleado -->
+        <!-- Kits por Empleado (VISIBLE PARA TODOS: Admin ve todos, Empleado ve solo el suyo) -->
         <section class="tc-box">
-            <h3 style="margin-bottom: 4px;">👤 Kits de Equipos Bajo Resguardo</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 6px;">
+                <h3 id="titulo-kits" style="margin:0;">👤 Kits de Equipos Bajo Resguardo por Colaborador</h3>
+                <small style="color:#64748b;">Refleja el valor financiero bajo responsabilidad de cada miembro del equipo</small>
+            </div>
             <div class="kits-grid" id="contenedor-kits">
                 <p>Cargando kits de empleados...</p>
             </div>
         </section>
 
-        <!-- Catálogo Maestro -->
-        <section class="tc-box">
+        <!-- Catálogo Maestro (SOLO ADMIN) -->
+        <section class="tc-box admin-only">
             <div class="filter-toolbar">
-                <h3 style="margin:0;">📦 Stock en Bodega Central IT</h3>
-                <div style="display: flex; gap: 10px;">
+                <h3 style="margin:0;">📦 Catálogo y Stock en Bodega Central IT</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <input type="text" id="input-buscar" class="search-input" placeholder="🔍 Buscar por código, serie o marca..." oninput="filtrarBusqueda()">
-                    <button onclick="descargarExcel()" class="btn-primary" style="padding: 8px 14px; font-size: 13px;">📥 Exportar Reporte</button>
+                    <button type="button" onclick="imprimirEtiquetasInventario()" class="btn-dark" style="padding: 8px 14px; font-size: 13px;">🖨️ Imprimir Viñetas</button>
+                    <button type="button" onclick="descargarExcel()" class="btn-primary" style="padding: 8px 14px; font-size: 13px;">📥 Exportar Excel</button>
                 </div>
             </div>
             
             <table class="tc-table">
                 <thead>
                     <tr>
-                        <th>Código</th>
+                        <th>Código Etiqueta</th>
                         <th>Categoría</th>
                         <th>Marca y Modelo</th>
-                        <th>Costo ($)</th>
-                        <th>Estado / Antigüedad</th>
+                        <th>Costo Unitario ($)</th>
+                        <th>Estado / Ubicación</th>
+                        <th>Etiqueta</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-equipos">
-                    <tr><td colspan="5">Cargando stock en bodega...</td></tr>
+                    <tr><td colspan="6">Cargando stock en bodega...</td></tr>
                 </tbody>
             </table>
         </section>
 
-        <!-- Bitácora -->
-        <section class="tc-box">
+        <!-- Bitácora (SOLO ADMIN) -->
+        <section class="tc-box admin-only">
             <h3 style="margin-bottom: 6px;">📋 Bitácora de Movimientos y Auditoría</h3>
             <table class="tc-table">
                 <thead>
@@ -241,6 +269,17 @@
 
         const usuario = JSON.parse(usuarioGuardado || '{}');
         let equiposGlobal = [];
+        let empleadosGlobal = [];
+
+        // Determinar si el usuario es Admin/Manager (Adriana o Desarrollador en pruebas)
+        const cargoLower = (usuario.cargo || '').toLowerCase();
+        const emailLower = (usuario.email || '').toLowerCase();
+        let esVistaAdmin = cargoLower.includes('admin') || 
+                           cargoLower.includes('gerente') || 
+                           cargoLower.includes('manager') || 
+                           cargoLower.includes('coordinador') || 
+                           cargoLower.includes('full-stack') || 
+                           emailLower.includes('adriana');
 
         // Inicializar Sidebar
         let iniciales = 'US';
@@ -254,10 +293,71 @@
 
         function iconoCategoria(cat) {
             const c = (cat || '').toLowerCase();
-            if (c.includes('laptop') || c.includes('portátil') || c.includes('pc')) return '💻';
-            if (c.includes('headset') || c.includes('casco')) return '🎧';
+            if (c.includes('propio') || c.includes('remoto')) return '🏠';
+            if (c.includes('kit') || c.includes('estación')) return '🖥️';
+            if (c.includes('laptop') || c.includes('portátil') || c.includes('pc') || c.includes('computadora')) return '💻';
+            if (c.includes('headset') || c.includes('casco') || c.includes('audio')) return '🎧';
+            if (c.includes('ups') || c.includes('energía') || c.includes('batería')) return '🔋';
             if (c.includes('monitor')) return '🖥️';
             return '⌨️';
+        }
+
+        // Autocompletar prefijo de código y costo $0.00 si elige Equipo Propio Remoto
+        function ajustarPorCategoria() {
+            const cat = document.getElementById('sel-categoria').value.toLowerCase();
+            const inpCodigo = document.getElementById('inp-codigo');
+            const inpCosto = document.getElementById('inp-costo');
+            const inpComentarios = document.getElementById('inp-comentarios');
+
+            const siguienteNum = String(equiposGlobal.length + 1).padStart(4, '0');
+
+            if (cat.includes('propio') || cat.includes('remoto')) {
+                inpCosto.value = '0.00';
+                if (!inpCodigo.value) inpCodigo.value = `TC-REM-${siguienteNum}`;
+                if (!inpComentarios.value) inpComentarios.value = 'Equipo personal del colaborador (Modalidad Remota - Costo $0 para Tellcenter)';
+            } else if (cat.includes('kit') || cat.includes('estación')) {
+                if (!inpCodigo.value) inpCodigo.value = `TC-KIT-${siguienteNum}`;
+            } else if (cat.includes('ups')) {
+                if (!inpCodigo.value) inpCodigo.value = `TC-UPS-${siguienteNum}`;
+            } else if (cat.includes('headset') || cat.includes('audio')) {
+                if (!inpCodigo.value) inpCodigo.value = `TC-AUD-${siguienteNum}`;
+            } else if (cat.includes('monitor')) {
+                if (!inpCodigo.value) inpCodigo.value = `TC-MON-${siguienteNum}`;
+            } else if (cat.includes('laptop') || cat.includes('computadora')) {
+                if (!inpCodigo.value) inpCodigo.value = `TC-PC-${siguienteNum}`;
+            }
+        }
+
+        // Aplicar permisos visuales según Rol (Admin vs Empleado)
+        function aplicarPermisosRol() {
+            const bloquesAdmin = document.querySelectorAll('.admin-only');
+            const lblVista = document.getElementById('lbl-vista-actual');
+            const tituloPagina = document.getElementById('titulo-pagina');
+            const subtituloPagina = document.getElementById('subtitulo-pagina');
+            const tituloKits = document.getElementById('titulo-kits');
+
+            bloquesAdmin.forEach(el => {
+                el.style.display = esVistaAdmin ? '' : 'none';
+            });
+
+            if (esVistaAdmin) {
+                lblVista.textContent = '👑 Admin / Manager (Adriana)';
+                tituloPagina.textContent = 'Resumen y Stock de Inventario';
+                subtituloPagina.textContent = 'Monitoreo de activos tecnológicos, control de costos operativos y asignación de Kits.';
+                tituloKits.textContent = '👤 Kits de Equipos Bajo Resguardo por Colaborador';
+            } else {
+                lblVista.textContent = '👤 Vista Empleado (Solo mi Kit)';
+                tituloPagina.textContent = 'Mi Kit Tecnológico Asignado';
+                subtituloPagina.textContent = 'Detalle de los equipos y herramientas bajo tu resguardo en Tellcenter.';
+                tituloKits.textContent = '🛡️ Mi Equipo Bajo Resguardo y Responsabilidad';
+            }
+
+            renderizarKits();
+        }
+
+        function alternarVistaDemo() {
+            esVistaAdmin = !esVistaAdmin;
+            aplicarPermisosRol();
         }
 
         function actualizarKPIsInventario(equipos) {
@@ -286,7 +386,70 @@
             document.getElementById('kpi-asignado').textContent = asignados.length;
             document.getElementById('kpi-bodega').textContent = disponibles.length;
             document.getElementById('kpi-valor-total').textContent = formatoMoneda.format(sumaTotal);
-            document.getElementById('kpi-valor-bodega').textContent = `En bodega: ${formatoMoneda.format(sumaBodega)}`;
+            document.getElementById('kpi-valor-bodega').textContent = `En bodega libre: ${formatoMoneda.format(sumaBodega)}`;
+        }
+
+        function renderizarKits() {
+            const listaMostrar = esVistaAdmin 
+                ? empleadosGlobal 
+                : empleadosGlobal.filter(emp => emp.id === usuario.id || emp.email === usuario.email);
+
+            if (listaMostrar.length === 0) {
+                document.getElementById('contenedor-kits').innerHTML = '<p style="color:#64748b;">No se encontraron kits asignados para tu usuario.</p>';
+                return;
+            }
+
+            document.getElementById('contenedor-kits').innerHTML = listaMostrar.map(emp => {
+                const partes = (emp.nombre || 'US').trim().split(' ');
+                const ini = partes.length >= 2 ? (partes[0][0] + partes[1][0]).toUpperCase() : partes[0].substring(0,2).toUpperCase();
+                const listaEquipos = emp.equipos || [];
+                
+                let costoTotalKit = 0;
+
+                const itemsHtml = listaEquipos.length === 0 ? '<div class="kit-item"><span style="color:#94a3b8;">Sin equipos corporativos asignados</span></div>' :
+                    listaEquipos.map(eq => {
+                        const costoEq = parseFloat(eq.costoCompra) || 0;
+                        costoTotalKit += costoEq;
+                        const esPropio = (eq.categoria || '').toLowerCase().includes('propio') || (eq.categoria || '').toLowerCase().includes('remoto');
+                        const badgePrecioUnitario = esPropio 
+                            ? `<span class="pill pill-remoto">Equipo Propio ($0.00)</span>`
+                            : `<span style="font-size:12px; font-weight:700; color:#0f172a; background:#e2e8f0; padding:3px 8px; border-radius:6px;">$${costoEq.toFixed(2)}</span>`;
+
+                        return `
+                            <div class="kit-item">
+                                <div>
+                                    <strong>${iconoCategoria(eq.categoria)} ${eq.marcaModelo}</strong>
+                                    <small>🏷️ <strong>${eq.codigoInventario}</strong> · Serie: ${eq.numeroSerie}</small>
+                                    ${eq.comentarios ? `<small style="color:#007a80;">📝 ${eq.comentarios}</small>` : ''}
+                                </div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    ${badgePrecioUnitario}
+                                    ${esVistaAdmin ? `<button class="btn-mini-print" title="Imprimir viñeta de este equipo" onclick="imprimirEtiquetaIndividual('${eq.codigoInventario}', '${eq.categoria}', '${eq.marcaModelo}', '${eq.numeroSerie}')">🏷️</button>` : ''}
+                                    ${esVistaAdmin ? `<button class="btn-mini-return" onclick="devolverEquipo(${eq.id})">↩ Bodega</button>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                return `
+                    <div class="kit-card">
+                        <div>
+                            <div class="kit-header">
+                                <div class="kit-avatar">${ini}</div>
+                                <div>
+                                    <strong style="font-size:15px;">${emp.nombre}</strong>
+                                    <small style="display:block;color:#64748b;font-size:12px;">${emp.email}</small>
+                                    <div class="kit-meta">
+                                        <span class="pill pill-asignado">${emp.cuenta || 'Tellcenter'}</span>
+                                        <span class="pill pill-bodega" style="background:#fef2f2; color:#b91c1c;">Total Kit: $${costoTotalKit.toFixed(2)} USD</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${itemsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function cargarTodo() {
@@ -297,9 +460,8 @@
                 ]);
 
                 equiposGlobal = await resInv.json();
-                const empleados = await resKits.json();
+                empleadosGlobal = await resKits.json();
 
-                // Actualizar las 4 tarjetas de KPIs (incluyendo valor en USD)
                 actualizarKPIsInventario(equiposGlobal);
 
                 const disponibles = equiposGlobal.filter(e => e.estado === 'EN_BODEGA');
@@ -308,58 +470,16 @@
                 const selEquipo = document.getElementById('sel-equipo-disponible');
                 selEquipo.innerHTML = disponibles.length === 0 ? '<option value="">No hay equipos libres en bodega...</option>' :
                     '<option value="">Seleccionar equipo disponible en bodega...</option>' +
-                    disponibles.map(eq => `<option value="${eq.id}">${eq.codigoInventario} — ${eq.marcaModelo}</option>`).join('');
+                    disponibles.map(eq => {
+                        const c = parseFloat(eq.costoCompra) || 0;
+                        return `<option value="${eq.id}">${eq.codigoInventario} — ${eq.marcaModelo} ($${c.toFixed(2)})</option>`;
+                    }).join('');
 
                 const selEmpleado = document.getElementById('sel-empleado');
                 selEmpleado.innerHTML = '<option value="">Seleccionar empleado de Tellcenter...</option>' +
-                    empleados.map(emp => `<option value="${emp.id}">${emp.nombre} (${emp.cuenta})</option>`).join('');
+                    empleadosGlobal.map(emp => `<option value="${emp.id}">${emp.nombre} (${emp.cuenta || 'General'})</option>`).join('');
 
-                // Renderizar Kits con cálculo de Costo Total
-                document.getElementById('contenedor-kits').innerHTML = empleados.map(emp => {
-                    const partes = (emp.nombre || 'US').trim().split(' ');
-                    const ini = partes.length >= 2 ? (partes[0][0] + partes[1][0]).toUpperCase() : partes[0].substring(0,2).toUpperCase();
-                    const listaEquipos = emp.equipos || [];
-                    
-                    let costoTotalKit = 0;
-
-                    const itemsHtml = listaEquipos.length === 0 ? '<div class="kit-item"><span style="color:#94a3b8;">Sin equipos asignados</span></div>' :
-                        listaEquipos.map(eq => {
-                            const costoEq = parseFloat(eq.costoCompra) || 0;
-                            costoTotalKit += costoEq;
-                            return `
-                                <div class="kit-item">
-                                    <div>
-                                        <strong>${iconoCategoria(eq.categoria)} ${eq.marcaModelo}</strong>
-                                        <small>${eq.codigoInventario} · Serie: ${eq.numeroSerie}</small>
-                                        ${eq.comentarios ? `<small style="color:#009ba3;">📝 ${eq.comentarios}</small>` : ''}
-                                    </div>
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <button class="btn-mini-return" onclick="devolverEquipo(${eq.id})">↩ Bodega</button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-
-                    return `
-                        <div class="kit-card">
-                            <div>
-                                <div class="kit-header">
-                                    <div class="kit-avatar">${ini}</div>
-                                    <div>
-                                        <strong style="font-size:15px;">${emp.nombre}</strong>
-                                        <small style="display:block;color:#64748b;font-size:12px;">${emp.email}</small>
-                                        <div class="kit-meta">
-                                            <span class="pill pill-asignado">${emp.cuenta}</span>
-                                            <span class="pill pill-bodega" style="background:#fef2f2; color:#b91c1c;">$${costoTotalKit.toFixed(2)} USD</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                ${itemsHtml}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
+                aplicarPermisosRol();
                 renderizarTablaStock();
                 renderizarBitacora(); 
 
@@ -374,9 +494,9 @@
 
         function renderizarTablaStock() {
             const textoBusqueda = document.getElementById('input-buscar').value.toLowerCase();
-            const disponibles = equiposGlobal.filter(e => e.estado === 'EN_BODEGA');
 
-            const filtrados = disponibles.filter(eq => {
+            // Mostrar todos los equipos en el catálogo maestro para que Adriana pueda buscar o imprimir etiquetas de cualquiera
+            const filtrados = equiposGlobal.filter(eq => {
                 return eq.codigoInventario.toLowerCase().includes(textoBusqueda) || 
                        eq.numeroSerie.toLowerCase().includes(textoBusqueda) || 
                        eq.marcaModelo.toLowerCase().includes(textoBusqueda) ||
@@ -385,24 +505,27 @@
 
             const tbody = document.getElementById('tbody-equipos');
             if (filtrados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5">No se encontraron equipos.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6">No se encontraron equipos.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = filtrados.map(eq => {
-                const fechaReg = new Date(eq.creadoEn);
-                const diasEnBodega = Math.floor((new Date() - fechaReg) / (1000 * 60 * 60 * 24));
-                const badgeEstado = diasEnBodega > 30 ? `<span class="pill pill-alerta">⚠️ Antiguo (${diasEnBodega}d)</span>` : `<span class="pill pill-bodega">Disponible</span>`;
                 const costoNum = parseFloat(eq.costoCompra);
-                const costoStr = !isNaN(costoNum) ? `$${costoNum.toFixed(2)}` : 'N/A';
+                const costoStr = !isNaN(costoNum) ? `$${costoNum.toFixed(2)}` : '$0.00';
+                const badgeEstado = eq.estado === 'EN_BODEGA' 
+                    ? `<span class="pill pill-bodega">En Bodega Libre</span>` 
+                    : `<span class="pill pill-asignado">Asignado (${eq.usuario ? eq.usuario.nombre : 'Kit'})</span>`;
 
                 return `
                     <tr>
-                        <td><strong>${eq.codigoInventario}</strong></td>
+                        <td><strong>${eq.codigoInventario}</strong><br><small style="color:#64748b;">Serie: ${eq.numeroSerie}</small></td>
                         <td>${iconoCategoria(eq.categoria)} ${eq.categoria}</td>
                         <td>${eq.marcaModelo}</td>
                         <td><strong>${costoStr}</strong></td>
                         <td>${badgeEstado}</td>
+                        <td>
+                            <button class="btn-mini-print" onclick="imprimirEtiquetaIndividual('${eq.codigoInventario}', '${eq.categoria}', '${eq.marcaModelo}', '${eq.numeroSerie}')">🖨️ Viñeta</button>
+                        </td>
                     </tr>
                 `;
             }).join('');
@@ -443,7 +566,7 @@
             }
         }
 
-        // Eventos Formularios con nuevos campos
+        // Eventos Formularios
         document.getElementById('form-equipo').addEventListener('submit', async (e) => {
             e.preventDefault();
             const msgObj = document.getElementById('msg-form');
@@ -452,7 +575,7 @@
                 numeroSerie: document.getElementById('inp-serie').value,
                 categoria: document.getElementById('sel-categoria').value,
                 marcaModelo: document.getElementById('inp-marca').value,
-                costoCompra: document.getElementById('inp-costo').value,
+                costoCompra: document.getElementById('inp-costo').value || 0,
                 comentarios: document.getElementById('inp-comentarios').value
             };
 
@@ -507,36 +630,119 @@
             cargarTodo();
         }
 
+        // FUNCIÓN PARA IMPRIMIR VIÑETAS FÍSICAS (PARA PEGAR EN CADA MÁQUINA)
+        function abrirVentanaImpresion(listaEquipos) {
+            const ventana = window.open('', '_blank', 'width=850,height=650');
+            const tarjetasHtml = listaEquipos.map(eq => `
+                <div class="etiqueta">
+                    <div class="etq-top">TELLCENTER S.A. DE C.V. · ACTIVO IT</div>
+                    <div class="etq-codigo">${eq.codigoInventario}</div>
+                    <div class="etq-barras">|||| |||| || ||||| |||| |||</div>
+                    <div class="etq-detalle">
+                        <strong>${eq.marcaModelo}</strong><br>
+                        <span>Cat: ${eq.categoria}</span><br>
+                        <span>S/N: ${eq.numeroSerie}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            ventana.document.write(`
+                <html>
+                <head>
+                    <title>Impresión de Viñetas de Inventario | Tellcenter</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; color: #0f172a; }
+                        .no-print { margin-bottom: 20px; padding: 12px; background: #f1f5f9; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+                        .btn-print { background: #00c4cc; color: #04242c; border: none; padding: 10px 18px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+                        .grid-etiquetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+                        .etiqueta { border: 2px dashed #334155; border-radius: 8px; padding: 12px; text-align: center; page-break-inside: avoid; }
+                        .etq-top { font-size: 9px; font-weight: bold; letter-spacing: 0.5px; color: #475569; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; }
+                        .etq-codigo { font-size: 20px; font-weight: 900; color: #091728; letter-spacing: 1px; }
+                        .etq-barras { font-family: monospace; font-size: 16px; letter-spacing: 2px; margin: 4px 0; color: #334155; }
+                        .etq-detalle { font-size: 11px; color: #334155; line-height: 1.35; }
+                        @media print { .no-print { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print">
+                        <div>
+                            <strong>Vista Previa de Viñetas para Pegar en Equipos</strong><br>
+                            <small>Recorta por la línea punteada y adhiere cada etiqueta al equipo correspondiente.</small>
+                        </div>
+                        <button class="btn-print" onclick="window.print()">🖨️ Imprimir Ahora</button>
+                    </div>
+                    <div class="grid-etiquetas">${tarjetasHtml}</div>
+                </body>
+                </html>
+            `);
+            ventana.document.close();
+        }
+
+        function imprimirEtiquetasInventario() {
+            if (equiposGlobal.length === 0) return alert('No hay equipos registrados para imprimir.');
+            abrirVentanaImpresion(equiposGlobal);
+        }
+
+        function imprimirEtiquetaIndividual(codigoInventario, categoria, marcaModelo, numeroSerie) {
+            abrirVentanaImpresion([{ codigoInventario, categoria, marcaModelo, numeroSerie }]);
+        }
+
+        // EXPORTAR REPORTE COMPLETO A EXCEL (CSV CON FORMATO UTF-8 BOM)
+        function descargarExcel() {
+            if (!equiposGlobal || equiposGlobal.length === 0) {
+                return alert("No hay equipos para exportar.");
+            }
+
+            const encabezados = [
+                "ID Etiqueta (Pegar en Maquina)",
+                "Categoria",
+                "Marca y Modelo",
+                "Numero de Serie",
+                "Estado Actual",
+                "Colaborador Asignado",
+                "Propiedad del Activo",
+                "Costo Unitario (USD)",
+                "Especificaciones / Notas"
+            ];
+
+            const filas = equiposGlobal.map(eq => {
+                const responsable = eq.usuario ? eq.usuario.nombre : "En Bodega Central IT";
+                const esPropio = (eq.categoria || '').toLowerCase().includes('propio') || (eq.categoria || '').toLowerCase().includes('remoto');
+                const propiedad = esPropio ? "Propio del Colaborador (Remoto)" : "Activo Tellcenter S.A.";
+                const costo = (parseFloat(eq.costoCompra) || 0).toFixed(2);
+                const notas = (eq.comentarios || "Sin observaciones").replace(/"/g, '""');
+
+                return [
+                    `"${eq.codigoInventario}"`,
+                    `"${eq.categoria}"`,
+                    `"${eq.marcaModelo}"`,
+                    `"${eq.numeroSerie}"`,
+                    `"${eq.estado}"`,
+                    `"${responsable}"`,
+                    `"${propiedad}"`,
+                    `"${costo}"`,
+                    `"${notas}"`
+                ].join(",");
+            });
+
+            const contenidoCsv = "\uFEFF" + [encabezados.join(","), ...filas].join("\n");
+            const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Reporte_Oficial_Inventario_Tellcenter.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        }
+
         document.getElementById('btn-logout').addEventListener('click', async (e) => {
             e.preventDefault();
             await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
             localStorage.clear();
             window.location.href = 'login.html';
         });
-
-        // Función para exportar reporte a CSV
-        async function descargarExcel() {
-            try {
-                const res = await fetch(`${API_URL}/inventario/exportar`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (!res.ok) throw new Error("Error al descargar");
-
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Reporte_Inventario_Tellcenter.csv';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error("Error generando Excel:", error);
-                alert("Ocurrió un error al intentar descargar el reporte.");
-            }
-        }
 
         cargarTodo();
     </script>
