@@ -8,6 +8,52 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style_login.css">
+    <style>
+        /* Estilos para el panel de Acceso Rápido Demo */
+        .demo-box {
+            margin-top: 18px;
+            padding: 12px 14px;
+            background: rgba(15, 23, 42, 0.04);
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .demo-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .demo-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-demo {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-demo:hover {
+            background: #00c4cc;
+            color: #04242c;
+            border-color: #00adb5;
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
 <body>
 
@@ -29,9 +75,25 @@
                 <!-- Se muestra si el correo o la contraseña no coinciden -->
                 <p class="login-error" id="login-error" role="alert" style="display: none;">Correo o contraseña incorrectos. Intenta de nuevo.</p>
 
-                <button type="submit" class="btn-login">Ingresar</button>
+                <button type="submit" class="btn-login" id="btn-submit-login">Ingresar</button>
 
-                <p class="login-help">¿Problemas para entrar? <a href="#">Contacta a Soporte IT</a></p>
+                <!-- PANEL DE ACCESO RÁPIDO PARA DEMOSTRACIÓN (VELADO & ADRIANA) -->
+                <div class="demo-box">
+                    <div class="demo-title">⚡ Acceso Rápido (Modo Demo / Pruebas)</div>
+                    <div class="demo-buttons">
+                        <button type="button" class="btn-demo" onclick="accesoRapido('adriana@tellcenter.com', '123456')">
+                            👑 Adriana (Admin)
+                        </button>
+                        <button type="button" class="btn-demo" onclick="accesoRapido('velado@tellcenter.com', '123456')">
+                            🏠 Velado (Remoto)
+                        </button>
+                        <button type="button" class="btn-demo" onclick="accesoRapido('carlos.mendoza@tellcenter.com', '123456')">
+                            🎧 Carlos (Agente)
+                        </button>
+                    </div>
+                </div>
+
+                <p class="login-help">¿Problemas para entrar? <a href="soporte.html">Contacta a Soporte IT</a></p>
                 <p class="login-forgot"><a href="#">🔒 ¿Olvidaste tu contraseña?</a></p>
             </form>
         </section>
@@ -39,12 +101,19 @@
     </main>
     
     <script>
+        // Función para rellenar credenciales y entrar con un solo clic en el video
+        function accesoRapido(correoDemo, passDemo) {
+            document.getElementById('correo').value = correoDemo;
+            document.getElementById('password').value = passDemo;
+            document.getElementById('login-form').requestSubmit();
+        }
+
         // Conexión real con el Backend de Node.js / Express
         document.getElementById('login-form').addEventListener('submit', async function (e) {
             e.preventDefault(); // Evita que la página se recargue por defecto
 
             // Capturar los valores utilizando tus IDs exactos
-            const email = document.getElementById('correo').value;
+            const email = document.getElementById('correo').value.trim();
             const password = document.getElementById('password').value;
             const errorElement = document.getElementById('login-error');
 

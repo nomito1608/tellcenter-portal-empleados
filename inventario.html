@@ -63,6 +63,7 @@
         .pill-remoto { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
         .pill-alerta { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 <body>
 
@@ -110,7 +111,7 @@
             </div>
         </div>
         <div class="side-bottom">
-            <a href="#" id="btn-logout" title="Cerrar sesión">⏻</a>
+            <a href="login.html" id="btn-logout" onclick="localStorage.clear();" title="Cerrar sesión">⏻</a>
             <a href="#" title="Notificaciones">🔔</a>
         </div>
     </aside>
@@ -495,7 +496,6 @@
         function renderizarTablaStock() {
             const textoBusqueda = document.getElementById('input-buscar').value.toLowerCase();
 
-            // Mostrar todos los equipos en el catálogo maestro para que Adriana pueda buscar o imprimir etiquetas de cualquiera
             const filtrados = equiposGlobal.filter(eq => {
                 return eq.codigoInventario.toLowerCase().includes(textoBusqueda) || 
                        eq.numeroSerie.toLowerCase().includes(textoBusqueda) || 
@@ -687,60 +687,166 @@
             abrirVentanaImpresion([{ codigoInventario, categoria, marcaModelo, numeroSerie }]);
         }
 
-        // EXPORTAR REPORTE COMPLETO A EXCEL (CSV CON FORMATO UTF-8 BOM)
-        function descargarExcel() {
+        // EXPORTAR REPORTE COMPLETO A EXCEL (.XLSX) CON FORMATO CORPORATIVO
+        async function descargarExcel() {
             if (!equiposGlobal || equiposGlobal.length === 0) {
                 return alert("No hay equipos para exportar.");
             }
 
-            const encabezados = [
-                "ID Etiqueta (Pegar en Maquina)",
-                "Categoria",
-                "Marca y Modelo",
-                "Numero de Serie",
-                "Estado Actual",
-                "Colaborador Asignado",
-                "Propiedad del Activo",
-                "Costo Unitario (USD)",
-                "Especificaciones / Notas"
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = 'Tellcenter Hub';
+            workbook.created = new Date();
+
+            // PESTAÑA 1: INVENTARIO MAESTRO IT
+            const ws1 = workbook.addWorksheet('1. Inventario Maestro IT');
+
+            ws1.mergeCells('A1:I1');
+            ws1.getCell('A1').value = 'TELLCENTER S.A. DE C.V. — REPORTE MAESTRO DE INVENTARIO Y COSTOS IT';
+            ws1.getCell('A1').font = { name: 'Calibri', size: 15, bold: true, color: { argb: 'FFFFFFFF' } };
+            ws1.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+            ws1.getCell('A1').alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+            ws1.getRow(1).height = 28;
+
+            ws1.mergeCells('A2:I2');
+            ws1.getCell('A2').value = `Generado en vivo desde Tellcenter Hub · Fecha: ${new Date().toLocaleDateString('es-SV')}`;
+            ws1.getCell('A2').font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FFCBD5E1' } };
+            ws1.getCell('A2').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+            ws1.getCell('A2').alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+            ws1.getRow(2).height = 20;
+
+            const headers1 = [
+                'ID Etiqueta (Pegar en Máquina)', 'Categoría Oficial', 'Marca y Modelo',
+                'Número de Serie', 'Estado Actual', 'Colaborador / Ubicación',
+                'Propiedad del Activo', 'Costo Unitario (USD)', 'Especificaciones / Notas'
             ];
-
-            const filas = equiposGlobal.map(eq => {
-                const responsable = eq.usuario ? eq.usuario.nombre : "En Bodega Central IT";
-                const esPropio = (eq.categoria || '').toLowerCase().includes('propio') || (eq.categoria || '').toLowerCase().includes('remoto');
-                const propiedad = esPropio ? "Propio del Colaborador (Remoto)" : "Activo Tellcenter S.A.";
-                const costo = (parseFloat(eq.costoCompra) || 0).toFixed(2);
-                const notas = (eq.comentarios || "Sin observaciones").replace(/"/g, '""');
-
-                return [
-                    `"${eq.codigoInventario}"`,
-                    `"${eq.categoria}"`,
-                    `"${eq.marcaModelo}"`,
-                    `"${eq.numeroSerie}"`,
-                    `"${eq.estado}"`,
-                    `"${responsable}"`,
-                    `"${propiedad}"`,
-                    `"${costo}"`,
-                    `"${notas}"`
-                ].join(",");
+            const headerRow1 = ws1.getRow(4);
+            headerRow1.values = headers1;
+            headerRow1.height = 24;
+            headerRow1.eachCell((cell) => {
+                cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
             });
 
-            const contenidoCsv = "\uFEFF" + [encabezados.join(","), ...filas].join("\n");
-            const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+            let sumaTotal = 0;
+            equiposGlobal.forEach((eq, index) => {
+                const responsable = eq.usuario ? eq.usuario.nombre : 'En Bodega Central IT';
+                const esPropio = (eq.categoria || '').toLowerCase().includes('propio') || (eq.categoria || '').toLowerCase().includes('remoto');
+                const propiedad = esPropio ? 'Propio del Colaborador (Remoto)' : 'Activo Tellcenter S.A.';
+                const costo = parseFloat(eq.costoCompra) || 0;
+                sumaTotal += costo;
+
+                const row = ws1.addRow([
+                    eq.codigoInventario,
+                    eq.categoria,
+                    eq.marcaModelo,
+                    eq.numeroSerie,
+                    eq.estado,
+                    responsable,
+                    propiedad,
+                    costo,
+                    eq.comentarios || 'Sin observaciones'
+                ]);
+                row.height = 20;
+
+                const bgRow = index % 2 === 0 ? 'FFF8FAFC' : 'FFFFFFFF';
+                row.eachCell((cell, colNumber) => {
+                    cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1E293B' } };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgRow } };
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                        bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                        left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                        right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+                    };
+
+                    if (colNumber === 1) cell.font = { name: 'Consolas', size: 10, bold: true };
+                    if (colNumber === 5) {
+                        cell.alignment = { horizontal: 'center' };
+                        if (eq.estado === 'ASIGNADO') {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0F8F9' } };
+                            cell.font = { name: 'Calibri', size: 9.5, bold: true, color: { argb: 'FF007A80' } };
+                        } else {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFECFDF5' } };
+                            cell.font = { name: 'Calibri', size: 9.5, bold: true, color: { argb: 'FF059669' } };
+                        }
+                    }
+                    if (colNumber === 7 && esPropio) {
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3E8FF' } };
+                        cell.font = { name: 'Calibri', size: 9.5, bold: true, color: { argb: 'FF7E22CE' } };
+                    }
+                    if (colNumber === 8) {
+                        cell.numFmt = '"$"#,##0.00';
+                        cell.font = { name: 'Calibri', size: 10, bold: true };
+                    }
+                });
+            });
+
+            const totalRow = ws1.addRow([
+                'VALOR TOTAL DEL INVENTARIO TECNOLÓGICO (USD)', '', '', '', '', '', '', sumaTotal, 'Calculado en tiempo real'
+            ]);
+            totalRow.height = 24;
+            ws1.mergeCells(`A${totalRow.number}:G${totalRow.number}`);
+            totalRow.eachCell((cell, colNumber) => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0F8F9' } };
+                cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF0F172A' } };
+                if (colNumber === 8) {
+                    cell.numFmt = '"$"#,##0.00';
+                    cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF007A80' } };
+                }
+            });
+
+            ws1.columns = [
+                { width: 26 }, { width: 32 }, { width: 34 }, { width: 18 },
+                { width: 16 }, { width: 22 }, { width: 28 }, { width: 20 }, { width: 42 }
+            ];
+
+            // PESTAÑA 2: RESUMEN DE KITS POR EMPLEADO
+            const ws2 = workbook.addWorksheet('2. Resumen Kits por Empleado');
+            ws2.mergeCells('A1:E1');
+            ws2.getCell('A1').value = 'INVERSIÓN EN KITS BAJO RESGUARDO POR COLABORADOR';
+            ws2.getCell('A1').font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+            ws2.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF007A80' } };
+            ws2.getRow(1).height = 26;
+
+            const hdr2 = ws2.getRow(3);
+            hdr2.values = ['Colaborador', 'Correo Electrónico', 'Departamento / Cuenta', 'Cant. Equipos Asignados', 'Valor Total del Kit (USD)'];
+            hdr2.height = 22;
+            hdr2.eachCell(c => {
+                c.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+            });
+
+            empleadosGlobal.forEach(emp => {
+                const lista = emp.equipos || [];
+                const totalEmp = lista.reduce((acc, item) => acc + (parseFloat(item.costoCompra) || 0), 0);
+                const r = ws2.addRow([emp.nombre, emp.email, emp.cuenta || 'Tellcenter', lista.length, totalEmp]);
+                r.getCell(5).numFmt = '"$"#,##0.00';
+                r.getCell(5).font = { bold: true };
+            });
+
+            ws2.columns = [{ width: 24 }, { width: 28 }, { width: 22 }, { width: 24 }, { width: 24 }];
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'Reporte_Oficial_Inventario_Tellcenter.csv';
+            a.download = 'Reporte_Oficial_Inventario_Tellcenter.xlsx';
             document.body.appendChild(a);
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
         }
 
-        document.getElementById('btn-logout').addEventListener('click', async (e) => {
+        // Evento de Cerrar Sesión (Botón ⏻)
+        document.getElementById('btn-logout').addEventListener('click', (e) => {
             e.preventDefault();
-            await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
             localStorage.clear();
+            fetch(`${API_URL}/auth/logout`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).catch(() => {});
             window.location.href = 'login.html';
         });
 
